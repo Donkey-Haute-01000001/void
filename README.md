@@ -9,7 +9,7 @@ generated in code.
 
 ## Play it
 
-1. Install [Godot 4.4](https://godotengine.org/download) or newer (the standard
+1. Install [Godot 4.7](https://godotengine.org/download) or newer (the standard
    version, not .NET).
 2. Open Godot, choose **Import**, and select this folder's `project.godot`.
 3. Press **F5** (or the Play button in the top right).
