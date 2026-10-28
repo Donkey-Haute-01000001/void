@@ -103,7 +103,7 @@ func _test_office_flow() -> void:
 	SaveSystem.delete_save()
 
 
-## Inner voices: script lines route to voices, passives roll, arguments pick.
+## Inner voices: script lines route to voices, notice rolls unlock skill choices.
 func _test_voices() -> void:
 	var story := DialogueLayer.new()
 	add_child(story)
@@ -119,6 +119,10 @@ func _test_voices() -> void:
 	story.sheet = load("res://data/characters/adrian.tres")
 	_check(await story.passive("psychology", -10, "demo_psy_passive"), "an easy passive always speaks")
 	_check(not await story.passive("occultism", 5, "demo_psy_passive"), "an impossible passive stays quiet")
-	_check(await story.argue(["demo_elo_1", "demo_psy_1"], ["a", "b"], 1) == 1, "an argument returns the side picked")
-	_check(DialogueLayer.skill_option("psychology", "Hi") == "[PSYCHOLOGY]  Hi", "skill options carry their tag")
+	var sure := story.skill_option("psychology", "Hi", 2, 1)
+	_check(sure["skill"] == "psychology" and story.odds(sure) == 84, "skill options show their odds")
+	_check(await story.attempt(story.skill_option("investigation", "Hi", 1, 2)) == false, "a skill option that can't pass fails its roll")
+	for skill in ["psychology", "investigation", "eloquence"]:
+		for outcome in ["pass", "fail"]:
+			_check(story.lines.has("demo_%s_%s" % [skill, outcome]) and story.lines.has("demo_ask_" + skill), "demo has %s %s lines" % [skill, outcome])
 	story.queue_free()

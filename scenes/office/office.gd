@@ -289,27 +289,31 @@ func _voice_demo() -> void:
 	_letterbox(true, true)
 	await story.say("demo_intro")
 	await story.say("demo_tom_1")
-	# A sure passive (for the demo) and a coin-flip one.
-	await story.passive("psychology", -10, "demo_psy_passive")
-	await story.passive("investigation", 3, "demo_inv_passive")
-	var pick := await story.choose([
-		DialogueLayer.skill_option("psychology", "\"You don't like this job either.\""),
-		"\"Nothing. Go.\"",
-	])
-	if pick == 0:
-		await story.say("demo_ask_like")
-		await story.say("demo_tom_like")
-	var side := await story.argue(["demo_elo_1", "demo_psy_1", "demo_elo_2", "demo_psy_2"], [
-		"Side with ELOQUENCE: ask about the war.",
-		"Side with PSYCHOLOGY: let him go.",
-	])
-	if side == 0:
-		await story.say("demo_ask_war")
-		await story.say("demo_tom_war")
-		await story.say("demo_narr_war")
-	else:
-		await story.say("demo_tom_go")
-		await story.say("demo_narr_go")
+	# Notice rolls: each skill that notices something unlocks a choice. The
+	# Psychology one is rigged to land so the demo always shows one.
+	var options := []
+	if await story.passive("psychology", -10, "demo_psy_passive"):
+		options.append(story.skill_option("psychology", "\"You don't like this job either.\""))
+	if await story.passive("investigation", 3, "demo_inv_passive"):
+		options.append(story.skill_option("investigation", "\"Who told you no this morning?\""))
+	if await story.passive("eloquence", 0, "demo_elo_passive"):
+		# The voices bicker. Flavour only: nobody makes you pick a side.
+		await story.say("demo_psy_doubt")
+		options.append(story.skill_option("eloquence", "\"You were over there, weren't you? France.\"", 2, 2))
+	options.append("\"Nothing. Go.\"")
+	# Unlocked choices stay on the list: try one, then try another.
+	while true:
+		var pick := await story.choose(options)
+		var option = options[pick]
+		if not option is Dictionary:
+			break
+		options.remove_at(pick)
+		var skill: String = option["skill"]
+		await story.say("demo_ask_" + skill)
+		var outcome := "pass" if await story.attempt(option) else "fail"
+		await story.say("demo_%s_%s" % [skill, outcome])
+	await story.say("demo_tom_go")
+	await story.say("demo_narr_go")
 	await story.say("demo_end")
 	GameState.reset()
 	get_tree().change_scene_to_file("res://scenes/title/title.tscn")
@@ -321,10 +325,9 @@ func _fee() -> void:
 	var skill := ADRIAN_SHEET.get_skill("eloquence")
 	var dice := 4 if GameState.has_examined("bills") else 3
 	var needed := 3
-	var odds := roundi(Dice.odds(skill, dice, needed) * 100.0)
 	var pick := await story.choose([
 		"Done.",
-		"For a diamond you can't report stolen? Thirty.\n    ELOQUENCE %d  ·  %d DICE  ·  NEED %d  ·  %d%%" % [skill, dice, needed, odds],
+		story.skill_option("eloquence", "For a diamond you can't report stolen? Thirty.", dice, needed),
 	], 1)
 	if pick == 0:
 		GameState.fee_per_day = 20
