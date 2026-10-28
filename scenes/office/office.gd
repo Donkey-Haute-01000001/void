@@ -270,18 +270,17 @@ func _knock_sequence() -> void:
 	_show_end_card()
 
 
-## Pushing the fee is a visible Eloquence check. The bills add a die. Tom
-## won't wait: if the timer runs out, Vale takes the twenty.
+## Pushing the fee is a visible Eloquence check. The bills add a die.
 func _fee() -> void:
 	await story.say("tom_fee")
 	var skill := ADRIAN_SHEET.get_skill("eloquence")
 	var dice := 4 if GameState.has_examined("bills") else 3
-	var needed := 2
+	var needed := 3
 	var odds := roundi(Dice.odds(skill, dice, needed) * 100.0)
 	var pick := await story.choose([
 		"Done.",
 		"For a diamond you can't report stolen? Thirty.\n    ELOQUENCE %d  ·  %d DICE  ·  NEED %d  ·  %d%%" % [skill, dice, needed, odds],
-	], 1, 8.0, 0)
+	], 1)
 	if pick == 0:
 		GameState.fee_per_day = 20
 		await story.say("say_done")

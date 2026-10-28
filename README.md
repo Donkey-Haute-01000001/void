@@ -35,7 +35,7 @@ choice. Press **C** to open Adrian's dossier.
   Two pay off already: the gin adds a line with Tom, and the bills add a die
   to the fee check. If Adrian takes the pistol, Tom notices it.
 - Tom's knock, the job, and a visible Eloquence dice check to push the fee.
-  The fee choice is timed: if the bar runs out, Adrian takes the twenty.
+  It needs 3 successes: about 51% on 3 dice, about 82% if the bills added a die.
 - Autosave at the start, at the knock and at the end. **Continue** on the
   title screen resumes from the last one.
 
