@@ -16,5 +16,5 @@ skills = {
 "strength": 5,
 "willpower": 3
 }
-perks = Array[String](["Silver Tongue", "Fast Hands"])
-flaw = "Poor Self-Esteem"
+perks = Array[String](["Silver Tongue", "Sucker Punch"])
+flaw = "Thin Skin"

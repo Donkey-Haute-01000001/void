@@ -10,8 +10,8 @@ const TIERS := [["STRONG", 10], ["AVERAGE", 8], ["POOR", 6]]
 ## Names chosen by Vishnu; the effects are proposals until the perk rules exist.
 const NOTES := {
 	"Silver Tongue": "+1 die on Eloquence checks to calm or persuade someone.",
-	"Fast Hands": "+1 die on lockpicking, pickpocketing and sleight of hand.",
-	"Poor Self-Esteem": "Takes it to heart. Loses extra Sanity when belittled or blamed.",
+	"Sucker Punch": "When talk fails, he hits first. +2 dice on the opening blow of a fight.",
+	"Thin Skin": "Heals slowly. Takes more Sanity damage.",
 }
 
 signal _closed
