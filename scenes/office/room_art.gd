@@ -124,3 +124,34 @@ func _draw_wall_things() -> void:
 	# Calendar, February 1939.
 	_quad(_p(0, 1.5, 1.2), _p(0, 1.95, 1.2), _p(0, 1.95, 1.8), _p(0, 1.5, 1.8), Color("#d8d0bc"))
 	_quad(_p(0, 1.5, 1.62), _p(0, 1.95, 1.62), _p(0, 1.95, 1.8), _p(0, 1.5, 1.8), Color("#7a2a2a"))
+	# Cork board over the bookcase: clippings, a photo, red string.
+	_quad(_p(2.0, 0, 1.4), _p(3.4, 0, 1.4), _p(3.4, 0, 2.15), _p(2.0, 0, 2.15), Color("#7a5a3a"))
+	var notes := [Vector3(2.1, 0, 1.95), Vector3(2.55, 0, 2.0), Vector3(2.95, 0, 1.9), Vector3(2.3, 0, 1.6), Vector3(2.85, 0, 1.55)]
+	for n in notes:
+		_quad(_p(n.x, 0, n.z - 0.16), _p(n.x + 0.3, 0, n.z - 0.16), _p(n.x + 0.3, 0, n.z + 0.05), _p(n.x, 0, n.z + 0.05), Color("#d8d0bc"))
+	var pins := PackedVector2Array()
+	for n in notes:
+		pins.append(_p(n.x + 0.15, 0, n.z))
+	draw_polyline(PackedVector2Array([pins[0], pins[3], pins[1], pins[4], pins[2]]), Color("#a02a2a"), 2.0)
+	for pin in pins:
+		draw_circle(pin, 3.0, Color("#c03030"))
+	# Wall clock over the couch, running ten minutes slow.
+	var c := _p(7.95, 0, 2.0)
+	var x_axis := (_p(8.95, 0, 2.0) - c) * 0.22
+	var up := (_p(7.95, 0, 3.0) - c) * 0.22
+	var rim := PackedVector2Array()
+	for i in 24:
+		var a := TAU * i / 24.0
+		rim.append(c + x_axis * cos(a) + up * sin(a))
+	draw_colored_polygon(rim, Color("#2a2119"))
+	var face := PackedVector2Array()
+	for v in rim:
+		face.append(c + (v - c) * 0.82)
+	draw_colored_polygon(face, Color("#d8d0bc"))
+	var minutes := fmod(_time / 60.0, 1.0)
+	var m := TAU * (0.25 - minutes)
+	var hr := TAU * (0.25 - (9.0 + minutes) / 12.0)
+	draw_line(c, c + (x_axis * cos(m) + up * sin(m)) * 0.7, Color("#141414"), 2.0)
+	draw_line(c, c + (x_axis * cos(hr) + up * sin(hr)) * 0.45, Color("#141414"), 3.0)
+	var sec := TAU * (0.25 - fmod(floorf(_time), 60.0) / 60.0)
+	draw_line(c, c + (x_axis * cos(sec) + up * sin(sec)) * 0.75, Color("#a02a2a"), 1.0)

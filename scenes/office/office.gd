@@ -9,7 +9,7 @@ const RoomArt := preload("res://scenes/office/room_art.gd")
 const SCREEN_FX := preload("res://ui/screen_fx.gdshader")
 
 const CELL := 0.25
-const ADRIAN_START := Vector2(6.4, 1.2)
+const ADRIAN_START := Vector2(6.5, 1.4)
 const DOOR_POINT := Vector2(0.35, 5.75)
 const TOM_STAND := Vector2(2.0, 5.3)
 const ADRIAN_TALK := Vector2(3.5, 4.5)
@@ -27,7 +27,10 @@ const HOTSPOTS := {
 ## Floor areas nothing can walk through: x, y, width, depth in tiles.
 const BLOCKERS := [
 	Rect2(3.4, 2.4, 2.6, 1.2),  # desk
-	Rect2(4.3, 1.3, 0.8, 0.8),  # desk chair
+	Rect2(4.5, 1.2, 0.8, 0.8),  # desk chair
+	Rect2(2.0, 0.0, 1.4, 0.6),  # bookcase
+	Rect2(7.0, 0.0, 1.9, 0.95),  # couch
+	Rect2(6.55, 3.45, 0.28, 0.28),  # waste bin
 	Rect2(4.2, 4.4, 0.7, 0.8),  # client chair
 	Rect2(0.7, 0.0, 0.9, 0.85),  # filing cabinet
 	Rect2(0.0, 3.85, 0.6, 0.55),  # coat rack
@@ -87,6 +90,7 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	if GameState.test_mode:
 		return
+	_blinds.queue_redraw()
 	var t := Time.get_ticks_msec() * 0.001
 	_lamp.energy = 1.35 + 0.05 * sin(t * 13.0) + 0.04 * sin(t * 3.1)
 	_next_lightning -= delta
@@ -452,6 +456,14 @@ func _box(parent: Node, at: Vector3, size: Vector3, color: Color, drawers := 0) 
 	return b
 
 
+func _prop(parent: Node, kind: String, anchor: Vector3) -> IsoProp:
+	var p := IsoProp.new().setup(kind, anchor)
+	parent.add_child(p)
+	if parent is IsoBox:
+		p.position -= (parent as IsoBox).position
+	return p
+
+
 func _build_stage() -> void:
 	_stage = Node2D.new()
 	add_child(_stage)
@@ -473,13 +485,28 @@ func _build_stage() -> void:
 	# Furniture.
 	_boxes["gin"] = _box(_world, Vector3(0.7, 0.05, 0), Vector3(0.9, 0.7, 1.6), Color("#4e504c"), 3)
 	_box(_world, Vector3(4.2, 0.05, 0), Vector3(2.2, 0.25, 0.6), Color("#45453f"))
-	_box(_world, Vector3(4.3, 1.3, 0.5), Vector3(0.8, 0.14, 0.75), Color("#3a2416"))
-	_box(_world, Vector3(4.3, 1.3, 0), Vector3(0.8, 0.8, 0.5), Color("#4a2e1c"))
+	var shelf := _box(_world, Vector3(2.0, 0.05, 0), Vector3(1.4, 0.55, 1.2), Color("#3e2a1c"))
+	_prop(shelf, "books", Vector3(3.4, 0.6, 0))
+	_prop(shelf, "radio", Vector3(3.4, 0.6, 0))
+	# The desk chair, pushed back and turned toward the window.
+	_box(_world, Vector3(4.5, 1.2, 0.5), Vector3(0.8, 0.14, 0.75), Color("#3a2416"))
+	_box(_world, Vector3(4.5, 1.2, 0), Vector3(0.8, 0.8, 0.5), Color("#4a2e1c"))
 	var desk := _box(_world, Vector3(3.4, 2.4, 0), Vector3(2.6, 1.2, 0.75), Color("#7a5236"), 0)
 	_box(_world, Vector3(4.2, 4.4, 0), Vector3(0.7, 0.7, 0.45), Color("#4a2e1c"))
 	_box(_world, Vector3(4.2, 5.08, 0.45), Vector3(0.7, 0.12, 0.65), Color("#3a2416"))
+	# The couch he slept on, under the clock.
+	_box(_world, Vector3(7.0, 0.05, 0), Vector3(1.9, 0.9, 0.42), Color("#5a2224"))
+	_box(_world, Vector3(7.0, 0.05, 0.42), Vector3(1.9, 0.25, 0.5), Color("#4a1a1c"))
+	_box(_world, Vector3(7.0, 0.3, 0.42), Vector3(0.18, 0.65, 0.18), Color("#4a1a1c"))
+	_box(_world, Vector3(8.72, 0.3, 0.42), Vector3(0.18, 0.65, 0.18), Color("#4a1a1c"))
+	_prop(_world, "blanket", Vector3(8.9, 1.0, 0))
+	# Waste bin and the drafts that missed it.
+	_box(_world, Vector3(6.55, 3.45, 0), Vector3(0.28, 0.28, 0.38), Color("#3a3a3a"))
+	_prop(_world, "papers", Vector3(6.3, 3.3, 0))
+	# Coat rack: the hit box is invisible, the coat and hat are drawn.
 	_box(_world, Vector3(0.25, 4.05, 0), Vector3(0.1, 0.1, 1.9), Color("#3a2a1c"))
-	_boxes["knife"] = _box(_world, Vector3(0.1, 3.9, 0.8), Vector3(0.42, 0.42, 1.0), Color("#33363c"))
+	_boxes["knife"] = _box(_world, Vector3(0.1, 3.9, 0.75), Vector3(0.42, 0.42, 1.05), Color(0, 0, 0, 0))
+	_prop(_world, "coat", Vector3(0.6, 4.4, 0))
 
 	# On and in the desk.
 	_boxes["pistol"] = _box(desk, Vector3(5.1, 3.58, 0.12), Vector3(0.7, 0.04, 0.32), Color("#6a4a30"))
@@ -489,6 +516,13 @@ func _build_stage() -> void:
 	_box(desk, Vector3(3.6, 2.6, 0.75), Vector3(0.22, 0.22, 0.04), Color("#a08040"))
 	_box(desk, Vector3(3.68, 2.68, 0.79), Vector3(0.05, 0.05, 0.3), Color("#a08040"))
 	_box(desk, Vector3(3.5, 2.55, 1.05), Vector3(0.42, 0.32, 0.12), Color("#2f6a46"))
+	# Case files, the ashtray, the telephone, last night's bottle.
+	_box(desk, Vector3(3.5, 3.0, 0.75), Vector3(0.5, 0.36, 0.05), Color("#c8a868"))
+	_box(desk, Vector3(3.53, 2.98, 0.8), Vector3(0.5, 0.36, 0.05), Color("#b89858"))
+	_box(desk, Vector3(3.5, 3.02, 0.85), Vector3(0.5, 0.36, 0.04), Color("#d0b070"))
+	_prop(desk, "ashtray", Vector3(6.0, 3.6, 0.75))
+	_prop(desk, "phone", Vector3(6.0, 3.6, 0.75))
+	_prop(desk, "bottle", Vector3(6.0, 3.6, 0.75))
 
 	adrian = Walker.new()
 	_world.add_child(adrian)
@@ -498,6 +532,8 @@ func _build_stage() -> void:
 	tom.height = 1.08
 	tom.width = 1.3
 	tom.hat = false
+	adrian.coat = false
+	adrian.hat = false
 	tom.face_color = Color("#a08870")
 	tom.visible = false
 	_world.add_child(tom)
@@ -557,6 +593,13 @@ func _draw_blind_light() -> void:
 			var t: float = corner[1] / -dir.z
 			quad.append(Iso.ground(Vector2(corner[0] + dir.x * t, dir.y * t)))
 		_blinds.draw_colored_polygon(quad, Color(0.55, 0.65, 0.85, strength))
+	# Dust turning in the light.
+	var t := Time.get_ticks_msec() * 0.001
+	for i in 26:
+		var u := fmod(i * 0.381 + t * 0.012 * (1 + i % 3), 1.0)
+		var h := fmod(i * 0.677 + t * 0.03, 1.0)
+		var pos := Iso.to_screen(Vector3(lerpf(3.6, 6.4, u), lerpf(0.6, 3.6, fmod(i * 0.29, 1.0)), h * 2.0))
+		_blinds.draw_circle(pos, 1.6, Color(0.9, 0.9, 1.0, 0.25 * sin(h * PI)))
 
 
 # --- Screen effects ---------------------------------------------------------

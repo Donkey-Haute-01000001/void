@@ -14,7 +14,7 @@
 
 		"pistol_1": {"speaker": "narrator", "text": "Bottom drawer. Under files that paid in promises: a pistol he owned and didn't love."},
 		"pistol_2": {"speaker": "narrator", "text": "Bought because a man in his line was supposed to. Never once carried. [shake rate=14 level=8][color=#e0b060]Dead witnesses can't talk.[/color][/shake]"},
-		"pistol_take": {"speaker": "narrator", "text": "He weighed it. Slid it into his coat. It sat there like a held breath."},
+		"pistol_take": {"speaker": "narrator", "text": "He weighed it. Tucked it into his waistband, under the vest. It sat there like a held breath."},
 		"pistol_leave": {"speaker": "narrator", "text": "He closed the drawer. Not for the first time."},
 
 		"gin_1": {"speaker": "narrator", "text": "Third drawer of the cabinet. Good gin, two-thirds full."},
@@ -32,7 +32,7 @@
 		"knock_1": {"speaker": "narrator", "text": "[shake rate=22 level=14][b]KNOCK.   KNOCK.   KNOCK.[/b][/shake]"},
 		"knock_2": {"speaker": "narrator", "text": "Not a client's knock. Clients knock like they're apologizing. This was a man who'd knocked on doors that didn't want to open."},
 		"tom_enter": {"speaker": "narrator", "text": "Broad enough to fill the doorway. A nose broken once and set in a hurry. A scar along the jaw. He took in the office in one look, and didn't think much of it."},
-		"tom_pistol": {"speaker": "narrator", "text": "His eyes found the weight in Vale's coat. Rested there. Moved on."},
+		"tom_pistol": {"speaker": "narrator", "text": "His eyes found the shape under Vale's vest. Rested there. Moved on."},
 		"tom_1": {"speaker": "tom", "text": "Vale? Garrity. I work for Mr. Edmund Wycliffe."},
 
 		"ask_want": {"speaker": "adrian", "text": "What does Wycliffe want?"},
