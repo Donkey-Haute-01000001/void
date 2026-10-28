@@ -77,5 +77,26 @@ func _test_office_flow() -> void:
 	_check(GameState.checkpoint == "office_done", "the scene reaches the end card")
 	_check(GameState.fee_per_day in [20, 30], "a fee was agreed ($%d)" % GameState.fee_per_day)
 	_check(SaveSystem.has_save(), "autosaved at the end")
+	_check(GameState.health == GameState.max_health() and GameState.sanity == GameState.max_sanity(),
+		"Health %d and Sanity %d start full" % [GameState.health, GameState.sanity])
+
+	# Walking round the desk: no point on the path may sit inside it.
+	var desk := Rect2(3.4, 2.4, 2.6, 1.2)
+	var path: PackedVector2Array = office._path(Vector2(6.4, 1.2), Vector2(3.0, 4.6))
+	var clear := path.size() > 1
+	for i in range(1, path.size()):
+		for t in 10:
+			if desk.has_point(path[i - 1].lerp(path[i], t / 10.0)):
+				clear = false
+	_check(clear, "Adrian's path goes round the desk (%d turns)" % path.size())
 	office.queue_free()
+
+	# The knife goes in his pocket and shows on the HUD.
+	GameState.reset()
+	var again: Node2D = load("res://scenes/office/office.tscn").instantiate()
+	add_child(again)
+	await get_tree().process_frame
+	await again.examine("knife")
+	_check(GameState.has_flag("has_knife") and GameState.items() == ["Folding knife"], "examining the coat pockets the knife")
+	again.queue_free()
 	SaveSystem.delete_save()

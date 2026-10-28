@@ -1,60 +1,83 @@
 extends Node2D
-## Case 1 opening: Adrian's office. The player examines three of six objects,
-## then Tom Garrity knocks with Wycliffe's job. All art is placeholder shapes.
+## Case 1 opening: Adrian's office, in isometric. The player examines three of
+## six objects, then Tom Garrity knocks with Wycliffe's job. All art is
+## placeholder shapes; lighting, text and layout are the real thing.
 
 const SCRIPT_PATH := "res://data/script/office.json"
 const ADRIAN_SHEET := preload("res://data/characters/adrian.tres")
-const ROOM_RIGHT := 1320.0
-var floor_points := PackedVector2Array([
-	Vector2(150, 600), Vector2(1170, 600), Vector2(1300, 1050), Vector2(20, 1050)])
-const DOOR_POINT := Vector2(1215, 690)
+const RoomArt := preload("res://scenes/office/room_art.gd")
+const SCREEN_FX := preload("res://ui/screen_fx.gdshader")
+
+const CELL := 0.25
+const ADRIAN_START := Vector2(6.4, 1.2)
+const DOOR_POINT := Vector2(0.35, 5.75)
+const TOM_STAND := Vector2(2.0, 5.3)
+const ADRIAN_TALK := Vector2(3.5, 4.5)
 
 ## The six things Adrian can look at before the knock. `stand` is where he
-## walks to first; `rect` is the clickable area.
+## walks to first, in floor tiles.
 const HOTSPOTS := {
-	"photo": {"label": "Sylvia's photograph", "rect": Rect2(565, 486, 44, 36), "stand": Vector2(600, 720)},
-	"bills": {"label": "The unpaid bills", "rect": Rect2(660, 500, 96, 26), "stand": Vector2(710, 720)},
-	"envelope": {"label": "Envelope for Worcester", "rect": Rect2(800, 500, 66, 26), "stand": Vector2(830, 720)},
-	"pistol": {"label": "The bottom drawer", "rect": Rect2(842, 586, 70, 46), "stand": Vector2(890, 730)},
-	"gin": {"label": "The filing cabinet", "rect": Rect2(222, 380, 110, 220), "stand": Vector2(300, 720)},
-	"knife": {"label": "Coat on the rack", "rect": Rect2(1082, 330, 70, 180), "stand": Vector2(1060, 730)},
+	"photo": {"label": "Sylvia's photograph", "stand": Vector2(4.4, 3.95)},
+	"bills": {"label": "The unpaid bills", "stand": Vector2(4.9, 3.95)},
+	"envelope": {"label": "Envelope for Worcester", "stand": Vector2(5.6, 3.95)},
+	"pistol": {"label": "The bottom drawer", "stand": Vector2(5.4, 4.0)},
+	"gin": {"label": "The filing cabinet", "stand": Vector2(1.2, 1.3)},
+	"knife": {"label": "Coat on the rack", "stand": Vector2(0.9, 4.3)},
 }
+## Floor areas nothing can walk through: x, y, width, depth in tiles.
+const BLOCKERS := [
+	Rect2(3.4, 2.4, 2.6, 1.2),  # desk
+	Rect2(4.3, 1.3, 0.8, 0.8),  # desk chair
+	Rect2(4.2, 4.4, 0.7, 0.8),  # client chair
+	Rect2(0.7, 0.0, 0.9, 0.85),  # filing cabinet
+	Rect2(0.0, 3.85, 0.6, 0.55),  # coat rack
+	Rect2(4.2, 0.0, 2.2, 0.35),  # radiator
+]
 
-var story: StoryPanel
+var story: DialogueLayer
+var hud: Hud
+var dossier: Dossier
 var adrian: Walker
 var tom: Walker
+
 var _busy := true
 var _exploring := false
 var _hover := ""
-var _time := 0.0
-var _counter: Label
-var _font: Font
+var _boxes := {}
+var _stage: Node2D
+var _world: Node2D
+var _room: RoomArt
+var _lamp: PointLight2D
+var _window_light: PointLight2D
+var _blinds: Node2D
+var _grid := AStarGrid2D.new()
+var _hover_label: Label
+var _fade: ColorRect
+var _bars: Array[ColorRect] = []
+var _next_lightning := 6.0
 
 
 func _ready() -> void:
-	_font = ThemeDB.fallback_font
-	story = StoryPanel.new()
+	_build_stage()
+	_build_grid()
+	_build_screen_fx()
+
+	story = DialogueLayer.new()
 	add_child(story)
 	story.load_script(SCRIPT_PATH)
+	story.speakers = {"adrian": adrian, "tom": tom}
+	hud = Hud.new()
+	add_child(hud)
+	dossier = Dossier.new()
+	add_child(dossier)
 
-	adrian = Walker.new()
-	adrian.position = Vector2(470, 820)
-	add_child(adrian)
-	tom = Walker.new()
-	tom.body_color = Color("#3a3128")
-	tom.height = 1.06
-	tom.position = DOOR_POINT
-	tom.visible = false
-	add_child(tom)
-
-	_build_counter()
 	Sfx.start_rain()
-
 	match GameState.checkpoint:
 		"knock":
-			_update_counter()
+			hud.show_hud(false, true)
 			_knock_sequence()
 		"office_done":
+			hud.show_hud(false, true)
 			_show_end_card()
 		_:
 			SaveSystem.autosave("start")
@@ -62,42 +85,64 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
-	_time += delta
-	queue_redraw()
+	if GameState.test_mode:
+		return
+	var t := Time.get_ticks_msec() * 0.001
+	_lamp.energy = 1.35 + 0.05 * sin(t * 13.0) + 0.04 * sin(t * 3.1)
+	_next_lightning -= delta
+	if _next_lightning <= 0.0:
+		_next_lightning = randf_range(9.0, 16.0)
+		_lightning()
 
 
 func _opening() -> void:
+	hud.show_hud(false, true)
+	_fade.color.a = 1.0
+	_letterbox(true, true)
+	adrian.place(ADRIAN_START)
+	adrian.face_toward(Vector2(5.3, 0.0))
 	await story.say("intro_1")
 	await story.say("intro_2")
+	if not GameState.test_mode:
+		var t := create_tween()
+		t.tween_property(_fade, "color:a", 0.0, 2.0)
+		await t.finished
 	await story.say("intro_3")
-	_update_counter()
+	await dossier.present(true)
+	await story.say("intro_4")
+	_letterbox(false)
+	hud.show_hud(true)
+	_update_objective()
 	_exploring = true
 	_busy = false
 
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion:
-		_hover = _hotspot_at(get_global_mouse_position()) if _exploring else ""
+		_set_hover(_hotspot_at(event.position) if _exploring and not _busy else "")
+		return
+	if event is InputEventKey and event.pressed and event.keycode == KEY_C and not _busy and not dossier.is_open:
+		_busy = true
+		await dossier.present()
+		_busy = false
 		return
 	if not (event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT):
 		return
 	if _busy:
 		return
-	var point := get_global_mouse_position()
-	if point.x > ROOM_RIGHT:
-		return
-	var hit := _hotspot_at(point) if _exploring else ""
+	var hit := _hotspot_at(event.position) if _exploring else ""
 	if hit != "":
 		examine(hit)
 	else:
-		adrian.walk_to(_clamp_to_floor(point))
+		_walk(adrian, Iso.to_world(event.position))
 
 
 ## Walk to an object and look at it. Public so the test runner can drive it.
 func examine(id: String) -> void:
 	_busy = true
-	_hover = ""
-	await adrian.walk_to(HOTSPOTS[id]["stand"])
+	_set_hover("")
+	await _walk(adrian, HOTSPOTS[id]["stand"])
+	adrian.face_toward(_box_floor(id))
 	if GameState.has_examined(id):
 		await story.say("already")
 	elif GameState.examined.size() >= GameState.MAX_EXAMINE:
@@ -105,10 +150,10 @@ func examine(id: String) -> void:
 	else:
 		await _examine_lines(id)
 		GameState.examined.append(id)
-		_update_counter()
+		_update_objective()
+		_boxes[id].modulate = Color(0.75, 0.75, 0.75)
 	if GameState.examined.size() >= GameState.MAX_EXAMINE:
 		_exploring = false
-		_hover = ""
 		await _pause(0.8)
 		await _knock_sequence()
 	else:
@@ -129,6 +174,7 @@ func _examine_lines(id: String) -> void:
 			var pick := await story.choose(["Take it.", "Leave it."], 1)
 			if pick == 0:
 				GameState.set_flag("has_pistol")
+				hud.refresh()
 				await story.say("pistol_take")
 			else:
 				await story.say("pistol_leave")
@@ -137,6 +183,8 @@ func _examine_lines(id: String) -> void:
 			await story.say("gin_2")
 		"knife":
 			await story.say("knife_1")
+			GameState.set_flag("has_knife")
+			hud.refresh()
 			await story.say("knife_2")
 		"bills":
 			await story.say("bills_1")
@@ -147,16 +195,21 @@ func _knock_sequence() -> void:
 	_busy = true
 	_exploring = false
 	SaveSystem.autosave("knock")
+	hud.show_hud(false)
+	_letterbox(true)
 	await _pause(0.6)
 	Sfx.play_knock()
-	await _pause(1.3)
+	_shake(14.0)
 	await story.say("knock_1")
 	await story.say("knock_2")
 
-	tom.position = DOOR_POINT
+	_room.door_open = true
+	tom.place(DOOR_POINT)
 	tom.visible = true
-	await tom.walk_to(Vector2(1010, 780))
-	adrian.walk_to(Vector2(640, 800))
+	_walk(adrian, ADRIAN_TALK)
+	await _walk(tom, TOM_STAND)
+	adrian.face_toward(tom.world)
+	tom.face_toward(adrian.world)
 	await story.say("tom_enter")
 	if GameState.has_flag("has_pistol"):
 		await story.say("tom_pistol")
@@ -165,7 +218,7 @@ func _knock_sequence() -> void:
 	# Small talk. Looking at the gin earlier unlocks an extra line.
 	var offered_drink := false
 	while true:
-		var options := ["What does Mr. Wycliffe want?"]
+		var options := ["What does Wycliffe want?"]
 		if GameState.has_examined("gin") and not offered_drink:
 			options.append("Drink?")
 		var pick := await story.choose(options)
@@ -179,6 +232,7 @@ func _knock_sequence() -> void:
 		break
 
 	await story.say("tom_2")
+	await story.say("tom_rose")
 	await story.say("tom_3")
 
 	var asked_why := false
@@ -200,15 +254,18 @@ func _knock_sequence() -> void:
 	await _fee()
 
 	await story.say("tom_leave")
-	await tom.walk_to(DOOR_POINT)
+	await _walk(tom, DOOR_POINT)
 	tom.visible = false
+	_room.door_open = false
 	await story.say("narr_close")
 	await story.say("end_1")
+	await story.say("end_2")
 	SaveSystem.autosave("office_done")
 	_show_end_card()
 
 
-## Pushing the fee is a visible Eloquence check. The bills add a die.
+## Pushing the fee is a visible Eloquence check. The bills add a die. Tom
+## won't wait: if the timer runs out, Vale takes the twenty.
 func _fee() -> void:
 	await story.say("tom_fee")
 	var skill := ADRIAN_SHEET.get_skill("eloquence")
@@ -217,8 +274,8 @@ func _fee() -> void:
 	var odds := roundi(Dice.odds(skill, dice, needed) * 100.0)
 	var pick := await story.choose([
 		"Done.",
-		"\"For a diamond you can't report stolen? Thirty.\"  [Eloquence %d · %d dice, need %d · %d%%]" % [skill, dice, needed, odds],
-	], 1)
+		"For a diamond you can't report stolen? Thirty.\n    ELOQUENCE %d  ·  %d DICE  ·  NEED %d  ·  %d%%" % [skill, dice, needed, odds],
+	], 1, 8.0, 0)
 	if pick == 0:
 		GameState.fee_per_day = 20
 		await story.say("say_done")
@@ -240,128 +297,336 @@ func _fee() -> void:
 
 func _show_end_card() -> void:
 	_busy = true
+	_letterbox(false)
 	var layer := CanvasLayer.new()
-	layer.layer = 20
+	layer.layer = 35
 	add_child(layer)
 	var shade := ColorRect.new()
-	shade.color = Color(0, 0, 0, 0)
+	shade.color = Color(0, 0, 0, 0.94 if GameState.test_mode else 0.0)
 	shade.set_anchors_preset(Control.PRESET_FULL_RECT)
 	layer.add_child(shade)
 	var box := VBoxContainer.new()
-	box.set_anchors_preset(Control.PRESET_CENTER)
-	box.alignment = BoxContainer.ALIGNMENT_CENTER
-	box.add_theme_constant_override("separation", 24)
-	box.position = Vector2(760, 420)
+	box.position = Vector2(220, 330)
+	box.add_theme_constant_override("separation", 10)
 	layer.add_child(box)
-	var title := Label.new()
-	title.text = "End of the office.\nNext: the Boston Civic Ballet."
-	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title.add_theme_font_size_override("font_size", 34)
-	title.add_theme_color_override("font_color", Color("#d8d2c4"))
-	box.add_child(title)
-	var fee := Label.new()
-	fee.text = "Fee agreed: $%d a day and expenses" % GameState.fee_per_day
-	fee.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	fee.add_theme_color_override("font_color", Color("#7d8a8f"))
-	box.add_child(fee)
+	box.add_child(Noir.label("END OF THE OFFICE", Noir.TITLE_FONT, 140, Noir.PAPER))
+	box.add_child(Noir.label("NEXT  ·  THE BOSTON CIVIC BALLET", Noir.TITLE_FONT, 44, Noir.AMBER))
+	box.add_child(Noir.label("Fee agreed: $%d a day and expenses." % GameState.fee_per_day, Noir.NARRATOR_FONT, 30, Noir.DIM))
 	var back := Button.new()
-	back.text = "Return to title"
+	back.text = "RETURN TO TITLE"
+	back.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	back.add_theme_font_override("font", Noir.TITLE_FONT)
+	back.add_theme_font_size_override("font_size", 34)
+	back.add_theme_color_override("font_color", Noir.PAPER)
+	back.add_theme_color_override("font_hover_color", Noir.AMBER)
+	back.add_theme_stylebox_override("normal", Noir.box(Color(0, 0, 0, 0), Color(1, 1, 1, 0.3), 12))
+	back.add_theme_stylebox_override("hover", Noir.box(Color(0, 0, 0, 0), Noir.AMBER, 12))
+	back.add_theme_stylebox_override("focus", Noir.box(Color(0, 0, 0, 0), Noir.AMBER, 12))
 	back.pressed.connect(func(): get_tree().change_scene_to_file("res://scenes/title/title.tscn"))
+	var spacer := Control.new()
+	spacer.custom_minimum_size.y = 40
+	box.add_child(spacer)
 	box.add_child(back)
 	if not GameState.test_mode:
-		create_tween().tween_property(shade, "color", Color(0, 0, 0, 0.92), 1.5)
+		box.modulate.a = 0.0
+		var t := create_tween()
+		t.tween_property(shade, "color:a", 0.94, 1.5)
+		t.tween_property(box, "modulate:a", 1.0, 0.8)
+
+
+# --- Movement ---------------------------------------------------------------
+
+func _walk(who: Walker, target: Vector2) -> void:
+	await who.follow(_path(who.world, target))
+
+
+func _path(from: Vector2, to: Vector2) -> PackedVector2Array:
+	var start := _open_cell(_cell(from))
+	var goal := _open_cell(_cell(to))
+	var ids := _grid.get_id_path(start, goal)
+	var points := PackedVector2Array()
+	for id in ids:
+		points.append((Vector2(id) + Vector2(0.5, 0.5)) * CELL)
+	if points.size() > 0 and _cell(to) == goal:
+		points[points.size() - 1] = to
+	return _simplify(points)
+
+
+## Drop points that sit on a straight line, so walks are smooth.
+func _simplify(points: PackedVector2Array) -> PackedVector2Array:
+	if points.size() < 3:
+		return points
+	var out := PackedVector2Array([points[0]])
+	for i in range(1, points.size() - 1):
+		var a := (points[i] - out[out.size() - 1]).normalized()
+		var b := (points[i + 1] - points[i]).normalized()
+		if a.dot(b) < 0.999:
+			out.append(points[i])
+	out.append(points[points.size() - 1])
+	return out
+
+
+func _cell(p: Vector2) -> Vector2i:
+	var size := _grid.region.size
+	return Vector2i(clampi(floori(p.x / CELL), 0, size.x - 1), clampi(floori(p.y / CELL), 0, size.y - 1))
+
+
+func _open_cell(c: Vector2i) -> Vector2i:
+	if not _grid.is_point_solid(c):
+		return c
+	for r in range(1, 12):
+		for dx in range(-r, r + 1):
+			for dy in range(-r, r + 1):
+				var n := c + Vector2i(dx, dy)
+				if _grid.is_in_boundsv(n) and not _grid.is_point_solid(n):
+					return n
+	return c
+
+
+func _build_grid() -> void:
+	_grid.region = Rect2i(0, 0, int(RoomArt.W / CELL), int(RoomArt.D / CELL))
+	_grid.cell_size = Vector2.ONE
+	_grid.diagonal_mode = AStarGrid2D.DIAGONAL_MODE_ONLY_IF_NO_OBSTACLES
+	_grid.update()
+	for x in _grid.region.size.x:
+		for y in _grid.region.size.y:
+			var centre := (Vector2(x, y) + Vector2(0.5, 0.5)) * CELL
+			var solid := centre.x < 0.3 and not (centre.y > RoomArt.DOOR_Y.x and centre.y < RoomArt.DOOR_Y.y)
+			solid = solid or centre.y < 0.3
+			for r in BLOCKERS:
+				if (r as Rect2).grow(0.15).has_point(centre):
+					solid = true
+			_grid.set_point_solid(Vector2i(x, y), solid)
+
+
+# --- Hotspots ---------------------------------------------------------------
+
+func _hotspot_at(point: Vector2) -> String:
+	# Small desk props first, so they win over the furniture behind them.
+	for id in ["photo", "bills", "envelope", "pistol", "knife", "gin"]:
+		var box: IsoBox = _boxes[id]
+		if box.hit(point) or point.distance_to(box.top_center()) < 30.0:
+			return id
+	return ""
+
+
+func _set_hover(id: String) -> void:
+	if id == _hover:
+		return
+	if _hover != "":
+		_boxes[_hover].highlighted = false
+		_boxes[_hover].queue_redraw()
+	_hover = id
+	_hover_label.visible = id != ""
+	if id == "":
+		return
+	var box: IsoBox = _boxes[id]
+	box.highlighted = true
+	box.queue_redraw()
+	var done := GameState.has_examined(id)
+	_hover_label.text = HOTSPOTS[id]["label"].to_upper() + ("   ·   SEEN" if done else "")
+	_hover_label.add_theme_color_override("font_color", Noir.DIM if done else Noir.AMBER)
+	_hover_label.reset_size()
+	_hover_label.position = box.top_center() - Vector2(_hover_label.size.x * 0.5, 70)
+
+
+func _box_floor(id: String) -> Vector2:
+	var box: IsoBox = _boxes[id]
+	return Vector2(box.origin.x + box.size.x * 0.5, box.origin.y + box.size.y * 0.5)
+
+
+func _update_objective() -> void:
+	var left := GameState.MAX_EXAMINE - GameState.examined.size()
+	hud.set_objective("THREE SMALL THINGS" if left > 0 else "", left, GameState.MAX_EXAMINE if left > 0 else 0)
+
+
+# --- The room ---------------------------------------------------------------
+
+func _box(parent: Node, at: Vector3, size: Vector3, color: Color, drawers := 0) -> IsoBox:
+	var b := IsoBox.new()
+	b.drawers = drawers
+	b.setup(at, size, color)
+	parent.add_child(b)
+	if parent is IsoBox:
+		b.position -= (parent as IsoBox).position
+	return b
+
+
+func _build_stage() -> void:
+	_stage = Node2D.new()
+	add_child(_stage)
+	_room = RoomArt.new()
+	_stage.add_child(_room)
+
+	_blinds = Node2D.new()
+	var add := CanvasItemMaterial.new()
+	add.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+	add.light_mode = CanvasItemMaterial.LIGHT_MODE_UNSHADED
+	_blinds.material = add
+	_blinds.draw.connect(_draw_blind_light)
+	_stage.add_child(_blinds)
+
+	_world = Node2D.new()
+	_world.y_sort_enabled = true
+	_stage.add_child(_world)
+
+	# Furniture.
+	_boxes["gin"] = _box(_world, Vector3(0.7, 0.05, 0), Vector3(0.9, 0.7, 1.6), Color("#4e504c"), 3)
+	_box(_world, Vector3(4.2, 0.05, 0), Vector3(2.2, 0.25, 0.6), Color("#45453f"))
+	_box(_world, Vector3(4.3, 1.3, 0.5), Vector3(0.8, 0.14, 0.75), Color("#3a2416"))
+	_box(_world, Vector3(4.3, 1.3, 0), Vector3(0.8, 0.8, 0.5), Color("#4a2e1c"))
+	var desk := _box(_world, Vector3(3.4, 2.4, 0), Vector3(2.6, 1.2, 0.75), Color("#7a5236"), 0)
+	_box(_world, Vector3(4.2, 4.4, 0), Vector3(0.7, 0.7, 0.45), Color("#4a2e1c"))
+	_box(_world, Vector3(4.2, 5.08, 0.45), Vector3(0.7, 0.12, 0.65), Color("#3a2416"))
+	_box(_world, Vector3(0.25, 4.05, 0), Vector3(0.1, 0.1, 1.9), Color("#3a2a1c"))
+	_boxes["knife"] = _box(_world, Vector3(0.1, 3.9, 0.8), Vector3(0.42, 0.42, 1.0), Color("#33363c"))
+
+	# On and in the desk.
+	_boxes["pistol"] = _box(desk, Vector3(5.1, 3.58, 0.12), Vector3(0.7, 0.04, 0.32), Color("#6a4a30"))
+	_boxes["photo"] = _box(desk, Vector3(4.05, 2.55, 0.75), Vector3(0.3, 0.08, 0.38), Color("#a08a5c"))
+	_boxes["bills"] = _box(desk, Vector3(4.6, 2.8, 0.75), Vector3(0.5, 0.36, 0.07), Color("#e2dccb"))
+	_boxes["envelope"] = _box(desk, Vector3(5.3, 3.0, 0.75), Vector3(0.42, 0.26, 0.03), Color("#d8c89a"))
+	_box(desk, Vector3(3.6, 2.6, 0.75), Vector3(0.22, 0.22, 0.04), Color("#a08040"))
+	_box(desk, Vector3(3.68, 2.68, 0.79), Vector3(0.05, 0.05, 0.3), Color("#a08040"))
+	_box(desk, Vector3(3.5, 2.55, 1.05), Vector3(0.42, 0.32, 0.12), Color("#2f6a46"))
+
+	adrian = Walker.new()
+	_world.add_child(adrian)
+	adrian.place(ADRIAN_START)
+	tom = Walker.new()
+	tom.body_color = Color("#2a2622")
+	tom.height = 1.08
+	tom.width = 1.3
+	tom.hat = false
+	tom.face_color = Color("#a08870")
+	tom.visible = false
+	_world.add_child(tom)
+	tom.place(DOOR_POINT)
+
+	var dark := CanvasModulate.new()
+	dark.color = Color(0.36, 0.38, 0.5)
+	_stage.add_child(dark)
+
+	_lamp = _light(Iso.to_screen(Vector3(3.7, 2.7, 0.9)), Color(1.0, 0.78, 0.45), 1.35, 4.2)
+	_window_light = _light(Iso.to_screen(Vector3(5.0, 2.4, 0.0)), Color(0.55, 0.68, 1.0), 0.55, 6.0)
+
+	_hover_label = Noir.label("", Noir.TITLE_FONT, 34, Noir.AMBER)
+	_hover_label.add_theme_color_override("font_outline_color", Color.BLACK)
+	_hover_label.add_theme_constant_override("outline_size", 10)
+	_hover_label.visible = false
+	var hover_layer := CanvasLayer.new()
+	hover_layer.layer = 15
+	hover_layer.add_child(_hover_label)
+	add_child(hover_layer)
+
+
+func _light(at: Vector2, color: Color, energy: float, scale_: float) -> PointLight2D:
+	var tex := GradientTexture2D.new()
+	tex.width = 256
+	tex.height = 256
+	tex.fill = GradientTexture2D.FILL_RADIAL
+	tex.fill_from = Vector2(0.5, 0.5)
+	tex.fill_to = Vector2(1.0, 0.5)
+	var g := Gradient.new()
+	g.set_color(0, Color(1, 1, 1, 1))
+	g.set_color(1, Color(0, 0, 0, 1))
+	g.add_point(0.4, Color(0.45, 0.45, 0.45, 1))
+	tex.gradient = g
+	var light := PointLight2D.new()
+	light.texture = tex
+	light.color = color
+	light.energy = energy
+	light.texture_scale = scale_
+	light.position = at
+	_stage.add_child(light)
+	return light
+
+
+## Venetian-blind light thrown across the floor from the window.
+func _draw_blind_light() -> void:
+	var dir := Vector3(-0.25, 1.0, -0.55)
+	var slats := 7
+	var z0 := RoomArt.WINDOW_Z.x
+	var z1 := RoomArt.WINDOW_Z.y
+	var strength: float = 0.07 + 0.5 * _room.flash
+	for i in slats:
+		var za := lerpf(z0, z1, (i + 0.35) / slats)
+		var zb := lerpf(z0, z1, (i + 0.85) / slats)
+		var quad := PackedVector2Array()
+		for corner in [[RoomArt.WINDOW_X.x, za], [RoomArt.WINDOW_X.y, za], [RoomArt.WINDOW_X.y, zb], [RoomArt.WINDOW_X.x, zb]]:
+			var t: float = corner[1] / -dir.z
+			quad.append(Iso.ground(Vector2(corner[0] + dir.x * t, dir.y * t)))
+		_blinds.draw_colored_polygon(quad, Color(0.55, 0.65, 0.85, strength))
+
+
+# --- Screen effects ---------------------------------------------------------
+
+func _build_screen_fx() -> void:
+	var fx := CanvasLayer.new()
+	fx.layer = 10
+	add_child(fx)
+	var grade := ColorRect.new()
+	grade.set_anchors_preset(Control.PRESET_FULL_RECT)
+	grade.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var mat := ShaderMaterial.new()
+	mat.shader = SCREEN_FX
+	grade.material = mat
+	fx.add_child(grade)
+	for top in [true, false]:
+		var bar := ColorRect.new()
+		bar.color = Color.BLACK
+		bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		bar.size = Vector2(1920, 0)
+		bar.position = Vector2(0, 0 if top else 1080)
+		fx.add_child(bar)
+		_bars.append(bar)
+	var fade_layer := CanvasLayer.new()
+	fade_layer.layer = 25
+	add_child(fade_layer)
+	_fade = ColorRect.new()
+	_fade.color = Color(0, 0, 0, 0)
+	_fade.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_fade.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	fade_layer.add_child(_fade)
+
+
+## Cinema bars for story beats; they slide away when the player has control.
+func _letterbox(on: bool, instant := false) -> void:
+	var h := 110.0 if on else 0.0
+	if instant or GameState.test_mode:
+		_bars[0].size.y = h
+		_bars[1].size.y = h
+		_bars[1].position.y = 1080 - h
+		return
+	var t := create_tween().set_parallel()
+	t.tween_property(_bars[0], "size:y", h, 0.6)
+	t.tween_property(_bars[1], "size:y", h, 0.6)
+	t.tween_property(_bars[1], "position:y", 1080 - h, 0.6)
+
+
+func _lightning() -> void:
+	var t := create_tween()
+	for strike in [0.9, 0.0, 1.0, 0.0]:
+		t.tween_method(_set_flash, _room.flash, strike, 0.05)
+		t.tween_interval(0.06)
+
+
+func _set_flash(v: float) -> void:
+	_room.flash = v
+	_window_light.energy = 0.55 + v * 2.2
+	_blinds.queue_redraw()
+
+
+func _shake(amount: float) -> void:
+	if GameState.test_mode:
+		return
+	var t := create_tween()
+	for i in 8:
+		t.tween_property(_stage, "position", Vector2(randf_range(-amount, amount), randf_range(-amount, amount) * 0.5), 0.035)
+	t.tween_property(_stage, "position", Vector2.ZERO, 0.05)
 
 
 func _pause(seconds: float) -> void:
 	if GameState.test_mode:
 		return
 	await get_tree().create_timer(seconds).timeout
-
-
-func _hotspot_at(point: Vector2) -> String:
-	for id in HOTSPOTS:
-		if (HOTSPOTS[id]["rect"] as Rect2).has_point(point):
-			return id
-	return ""
-
-
-func _clamp_to_floor(point: Vector2) -> Vector2:
-	if Geometry2D.is_point_in_polygon(point, floor_points):
-		return point
-	var best: Vector2 = floor_points[0]
-	for i in floor_points.size():
-		var p := Geometry2D.get_closest_point_to_segment(point, floor_points[i], floor_points[(i + 1) % floor_points.size()])
-		if p.distance_to(point) < best.distance_to(point):
-			best = p
-	return best
-
-
-func _build_counter() -> void:
-	var layer := CanvasLayer.new()
-	add_child(layer)
-	_counter = Label.new()
-	_counter.position = Vector2(40, 30)
-	_counter.add_theme_font_size_override("font_size", 22)
-	_counter.add_theme_color_override("font_color", Color("#8b857a"))
-	layer.add_child(_counter)
-
-
-func _update_counter() -> void:
-	var left := GameState.MAX_EXAMINE - GameState.examined.size()
-	_counter.text = "Three small things · %d left" % left if left > 0 else ""
-
-
-# --- Placeholder room, drawn with plain shapes -----------------------------
-
-func _draw() -> void:
-	# Walls and floor.
-	draw_colored_polygon(PackedVector2Array([Vector2(20, 40), Vector2(150, 120), Vector2(150, 600), Vector2(20, 1050)]), Color("#1e1d1a"))
-	draw_colored_polygon(PackedVector2Array([Vector2(1170, 120), Vector2(1300, 40), Vector2(1300, 1050), Vector2(1170, 600)]), Color("#1b1a18"))
-	draw_rect(Rect2(150, 120, 1020, 480), Color("#2b2925"))
-	draw_rect(Rect2(150, 470, 1020, 130), Color("#221f1b"))
-	draw_colored_polygon(floor_points, Color("#33291f"))
-	for i in range(1, 9):
-		var t := i / 9.0
-		draw_line(floor_points[0].lerp(floor_points[1], t), floor_points[3].lerp(floor_points[2], t), Color("#2b2219"), 2.0)
-
-	# Window with rain.
-	var window := Rect2(500, 190, 300, 230)
-	draw_rect(window, Color("#141c27"))
-	for i in 26:
-		var x := window.position.x + fmod(i * 37.0 + _time * 15.0, window.size.x)
-		var y := window.position.y + fmod(i * 53.0 + _time * 420.0, window.size.y)
-		draw_line(Vector2(x, y), Vector2(x - 3, minf(y + 22, window.end.y)), Color(0.55, 0.65, 0.75, 0.35), 1.5)
-	draw_rect(window, Color("#4a4237"), false, 10.0)
-	draw_line(Vector2(window.get_center().x, window.position.y), Vector2(window.get_center().x, window.end.y), Color("#4a4237"), 6.0)
-
-	# Door with frosted glass.
-	draw_colored_polygon(PackedVector2Array([Vector2(1192, 300), Vector2(1272, 262), Vector2(1272, 712), Vector2(1192, 660)]), Color("#3f3226"))
-	draw_colored_polygon(PackedVector2Array([Vector2(1202, 330), Vector2(1262, 302), Vector2(1262, 470), Vector2(1202, 490)]), Color(0.62, 0.66, 0.66, 0.55))
-
-	# Desk, chair, filing cabinet, coat rack.
-	draw_rect(Rect2(690, 440, 90, 70), Color("#2a221b"))
-	draw_rect(Rect2(520, 520, 420, 46), Color("#6b5440"))
-	draw_rect(Rect2(540, 566, 380, 96), Color("#4f3d2d"))
-	draw_rect(Rect2(222, 380, 110, 220), Color("#45443e"))
-	for i in 3:
-		draw_rect(Rect2(234, 396 + i * 70, 86, 56), Color("#3a3934"), false, 3.0)
-	draw_line(Vector2(1110, 320), Vector2(1110, 610), Color("#2c241c"), 8.0)
-	draw_colored_polygon(PackedVector2Array([Vector2(1090, 340), Vector2(1135, 340), Vector2(1148, 505), Vector2(1080, 505)]), Color("#24262b"))
-
-	# Props on the desk.
-	draw_rect(Rect2(570, 490, 34, 30), Color("#8a7a5c"))
-	draw_rect(Rect2(576, 495, 22, 20), Color("#c8c1b0"))
-	draw_rect(Rect2(664, 506, 88, 14), Color("#d6d0bf"))
-	draw_rect(Rect2(806, 506, 56, 14), Color("#cbbf9a"))
-	draw_rect(Rect2(866, 604, 24, 8), Color("#8f7a52"))
-
-	# Highlights.
-	if _exploring:
-		for id in HOTSPOTS:
-			var rect: Rect2 = HOTSPOTS[id]["rect"]
-			if GameState.has_examined(id):
-				draw_rect(rect.grow(4), Color(1, 1, 1, 0.08), false, 2.0)
-			elif id == _hover:
-				draw_rect(rect.grow(6), Color("#d9a441"), false, 3.0)
-				draw_string(_font, rect.position + Vector2(0, -14), HOTSPOTS[id]["label"],
-					HORIZONTAL_ALIGNMENT_LEFT, -1, 24, Color("#f3d08a"))

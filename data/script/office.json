@@ -1,64 +1,67 @@
 {
-	"_readme": "Every line the office slice shows. The key is the line's id: a voice recording saved as res://audio/vo/<id>.ogg plays automatically with that line. Speakers: narrator, adrian, tom.",
+	"_readme": "Every line the office slice shows. The key is the line's id: a voice recording saved as res://audio/vo/<id>.ogg plays automatically with that line. Speakers: narrator, adrian, tom. Narrator lines are captions; adrian and tom speak in boxes over their heads. BBCode works: [shake], [wave], [color=#hex].",
 	"lines": {
-		"intro_1": {"speaker": "narrator", "text": "Boston. February, nineteen thirty-nine. The radiator knocked like a debtor and gave nothing back."},
-		"intro_2": {"speaker": "narrator", "text": "Four floors up, behind frosted glass that spelled his name backward to him every morning, Adrian Vale kept an office with very little in it."},
-		"intro_3": {"speaker": "narrator", "text": "He had time, he judged, for three small things before the day came looking for him."},
+		"intro_1": {"speaker": "narrator", "text": "Boston. February. Nineteen thirty-nine."},
+		"intro_2": {"speaker": "narrator", "text": "Rain on the glass. Rent on the desk. A radiator that had stopped pretending."},
+		"intro_3": {"speaker": "narrator", "text": "Four floors up, behind frosted glass that spelled his name backward, [color=#e0b060]Adrian Vale[/color] waited for the day to find him."},
+		"intro_4": {"speaker": "narrator", "text": "He had time for [color=#e0b060]three small things[/color]."},
 
-		"photo_1": {"speaker": "narrator", "text": "A photograph of a girl of seventeen, caught mid-laugh, as though the camera had told her a bad joke. Sylvia."},
-		"photo_2": {"speaker": "narrator", "text": "He talked about his sister to anyone who would sit still long enough. The frame was the only thing in the office he had paid full price for."},
+		"photo_1": {"speaker": "narrator", "text": "Sylvia. Seventeen. Caught mid-laugh, like the camera had told her a bad joke."},
+		"photo_2": {"speaker": "narrator", "text": "He talked about her to anyone who'd sit still. The frame was the only thing in the office he'd paid full price for."},
 
-		"envelope_1": {"speaker": "narrator", "text": "An envelope addressed to Worcester in his own careful hand. Inside, the month's money for home."},
-		"envelope_2": {"speaker": "narrator", "text": "It was always sent. It was never quite enough to stop sending."},
+		"envelope_1": {"speaker": "narrator", "text": "An envelope for Worcester, in his own careful hand. The month's money for home."},
+		"envelope_2": {"speaker": "narrator", "text": "Always sent. [color=#8d887d]Never quite enough to stop sending.[/color]"},
 
-		"pistol_1": {"speaker": "narrator", "text": "In the bottom drawer, beneath files from cases that had paid in promises, lay a pistol he owned and did not love."},
-		"pistol_2": {"speaker": "narrator", "text": "He had bought it because a man in his line was supposed to. He had never once carried it. Dead witnesses can't talk."},
-		"pistol_take": {"speaker": "narrator", "text": "He weighed it in his palm, then slid it into his coat. It sat there like a held breath."},
-		"pistol_leave": {"speaker": "narrator", "text": "He closed the drawer. It was not the first time."},
+		"pistol_1": {"speaker": "narrator", "text": "Bottom drawer. Under files that paid in promises: a pistol he owned and didn't love."},
+		"pistol_2": {"speaker": "narrator", "text": "Bought because a man in his line was supposed to. Never once carried. [shake rate=14 level=8][color=#e0b060]Dead witnesses can't talk.[/color][/shake]"},
+		"pistol_take": {"speaker": "narrator", "text": "He weighed it. Slid it into his coat. It sat there like a held breath."},
+		"pistol_leave": {"speaker": "narrator", "text": "He closed the drawer. Not for the first time."},
 
-		"gin_1": {"speaker": "narrator", "text": "Behind the third drawer of the filing cabinet: good gin, the bottle two-thirds full."},
-		"gin_2": {"speaker": "narrator", "text": "For after work. Never during. It was not yet after."},
+		"gin_1": {"speaker": "narrator", "text": "Third drawer of the cabinet. Good gin, two-thirds full."},
+		"gin_2": {"speaker": "narrator", "text": "For after work. Never during. [color=#8d887d]It wasn't after yet.[/color]"},
 
-		"knife_1": {"speaker": "narrator", "text": "A plain folding knife, long and slim, black-handled. No monogram. No ornament."},
-		"knife_2": {"speaker": "narrator", "text": "Just a knife, for opening boxes. He put it in his pocket, as he did every morning."},
+		"knife_1": {"speaker": "narrator", "text": "In the coat on the rack: a folding knife. Long, slim, black-handled. No monogram."},
+		"knife_2": {"speaker": "narrator", "text": "For opening boxes. He pocketed it, same as every morning."},
 
-		"bills_1": {"speaker": "narrator", "text": "Bills, sorted with great care into the order he intended to ignore them. The rent. The telephone. A tailor who had begun writing in a less friendly hand."},
-		"bills_2": {"speaker": "narrator", "text": "The office was afloat, in the way a man treading water is afloat."},
+		"bills_1": {"speaker": "narrator", "text": "Bills, sorted with care into the order he meant to ignore them. Rent. Telephone. A tailor whose handwriting had turned unfriendly."},
+		"bills_2": {"speaker": "narrator", "text": "The office was afloat. The way a man treading water is afloat."},
 
-		"already": {"speaker": "narrator", "text": "He had already looked. Looking again would not change it."},
-		"no_time": {"speaker": "narrator", "text": "There was no more time for small things."},
+		"already": {"speaker": "narrator", "text": "He'd looked. Looking again wouldn't change it."},
+		"no_time": {"speaker": "narrator", "text": "No more time for small things."},
 
-		"knock_1": {"speaker": "narrator", "text": "Three knocks."},
-		"knock_2": {"speaker": "narrator", "text": "Not a client's knock. Clients knocked as though they were apologising. This was a man who had knocked on doors that did not want to open."},
-		"tom_enter": {"speaker": "narrator", "text": "The man in the doorway was broad enough to fill it. His nose had been broken once and set by someone in a hurry, and a scar ran the line of his jaw. He took in the room in one look and did not seem to think much of it."},
-		"tom_pistol": {"speaker": "narrator", "text": "His eyes went once to the weight in Vale's coat, rested there a moment, and moved on."},
+		"knock_1": {"speaker": "narrator", "text": "[shake rate=22 level=14][b]KNOCK.   KNOCK.   KNOCK.[/b][/shake]"},
+		"knock_2": {"speaker": "narrator", "text": "Not a client's knock. Clients knock like they're apologizing. This was a man who'd knocked on doors that didn't want to open."},
+		"tom_enter": {"speaker": "narrator", "text": "Broad enough to fill the doorway. A nose broken once and set in a hurry. A scar along the jaw. He took in the office in one look, and didn't think much of it."},
+		"tom_pistol": {"speaker": "narrator", "text": "His eyes found the weight in Vale's coat. Rested there. Moved on."},
 		"tom_1": {"speaker": "tom", "text": "Vale? Garrity. I work for Mr. Edmund Wycliffe."},
 
-		"ask_want": {"speaker": "adrian", "text": "What does Mr. Wycliffe want?"},
+		"ask_want": {"speaker": "adrian", "text": "What does Wycliffe want?"},
 		"ask_drink": {"speaker": "adrian", "text": "Drink?"},
 		"tom_drink": {"speaker": "tom", "text": "Not on the clock."},
-		"narr_drink": {"speaker": "narrator", "text": "Neither, Vale noted, was he. It was the first thing they agreed on."},
+		"narr_drink": {"speaker": "narrator", "text": "Neither was Vale. First thing they agreed on."},
 
-		"tom_2": {"speaker": "tom", "text": "Something was taken from his house in Brookline. A hair ornament. White diamonds, made to look like a rose with frost on it. They call it the Winter Rose."},
-		"tom_3": {"speaker": "tom", "text": "He'd like it back. Quietly. No police, no newspapers."},
+		"tom_2": {"speaker": "tom", "text": "Something walked out of his house in Brookline. A hair ornament. White diamonds, made like a rose with frost on it."},
+		"tom_rose": {"speaker": "tom", "text": "[wave amp=24 freq=2][color=#cfe3ff]The Winter Rose.[/color][/wave]"},
+		"tom_3": {"speaker": "tom", "text": "He wants it back. Quiet. No cops. No papers."},
 
 		"ask_why": {"speaker": "adrian", "text": "Why me?"},
 		"tom_why": {"speaker": "tom", "text": "You came recommended."},
-		"narr_why": {"speaker": "narrator", "text": "Garrity said it the way a man reads a line he has been given. He looked at Vale as though Vale were a job he had not yet decided how to do."},
+		"narr_why": {"speaker": "narrator", "text": "Said like a line he'd been handed. He looked at Vale like a job he hadn't decided how to do."},
 		"ask_start": {"speaker": "adrian", "text": "Where do I start?"},
-		"tom_4": {"speaker": "tom", "text": "The girl who wears it. The prima at the Civic Ballet, come the spring. And there's a Miss Ashcroft at his museum who knows its history better than he does."},
+		"tom_4": {"speaker": "tom", "text": "The girl who wears it. Prima at the Civic Ballet, come spring. And a Miss Ashcroft at his museum. Knows its history better than he does."},
 
-		"tom_fee": {"speaker": "tom", "text": "Twenty a day and expenses."},
+		"tom_fee": {"speaker": "tom", "text": "Twenty a day. Expenses."},
 		"say_done": {"speaker": "adrian", "text": "Done."},
 		"tom_done": {"speaker": "tom", "text": "Good."},
-		"say_haggle": {"speaker": "adrian", "text": "For a diamond you can't report stolen? Thirty."},
-		"bills_fee": {"speaker": "narrator", "text": "He thought of the tailor's letter, and found his voice."},
+		"say_haggle": {"speaker": "adrian", "text": "For a diamond you can't report stolen? [color=#e0b060]Thirty.[/color]"},
+		"bills_fee": {"speaker": "narrator", "text": "He thought of the tailor's letter. Found his voice."},
 		"tom_fee_win": {"speaker": "tom", "text": "Thirty. He said you'd haggle."},
 		"tom_fee_lose": {"speaker": "tom", "text": "Twenty. He said you'd haggle, too."},
-		"narr_fee_lose": {"speaker": "narrator", "text": "Garrity's face did not move. It did not need to."},
+		"narr_fee_lose": {"speaker": "narrator", "text": "Garrity's face didn't move. It didn't need to."},
 
 		"tom_leave": {"speaker": "tom", "text": "I'll be in touch, Vale."},
-		"narr_close": {"speaker": "narrator", "text": "The door closed. The office seemed, for a moment, smaller than before."},
-		"end_1": {"speaker": "narrator", "text": "A stolen rose. A dancer. A museum full of other men's treasures. It was, for the first time in a long while, a case."}
+		"narr_close": {"speaker": "narrator", "text": "The door shut. The office got smaller."},
+		"end_1": {"speaker": "narrator", "text": "A stolen rose. A dancer. A museum full of other men's treasures."},
+		"end_2": {"speaker": "narrator", "text": "For the first time in a long while: [color=#e0b060]a case.[/color]"}
 	}
 }
