@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="CharacterSheet" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://core/character_sheet.gd" id="1_sheet"]
+
+[resource]
+script = ExtResource("1_sheet")
+display_name = "Adrian Vale"
+skills = {
+"eloquence": 8,
+"firearms": 5,
+"investigation": 8,
+"medicine": 2,
+"occultism": 1,
+"psychology": 6,
+"speed": 7,
+"strength": 5,
+"willpower": 3
+}
+perks = Array[String](["Defuser", "Still Hands"])
+flaw = "Doesn't Look After Himself"

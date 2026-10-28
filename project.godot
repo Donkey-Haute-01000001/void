@@ -1,0 +1,33 @@
+; Engine configuration file.
+; Open this folder in Godot 4.4 or newer and press Play (F5).
+
+config_version=5
+
+[application]
+
+config/name="Case 1: The Winter Rose (vertical slice)"
+run/main_scene="res://scenes/title/title.tscn"
+config/features=PackedStringArray("4.4", "GL Compatibility")
+config/icon="res://icon.svg"
+
+[autoload]
+
+GameState="*res://autoload/game_state.gd"
+SaveSystem="*res://autoload/save_system.gd"
+Dice="*res://autoload/dice.gd"
+Sfx="*res://autoload/sfx.gd"
+
+[display]
+
+window/size/viewport_width=1920
+window/size/viewport_height=1080
+window/size/window_width_override=1600
+window/size/window_height_override=900
+window/stretch/mode="canvas_items"
+window/stretch/aspect="keep"
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+environment/defaults/default_clear_color=Color(0.047, 0.047, 0.055, 1)
