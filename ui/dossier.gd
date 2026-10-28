@@ -7,11 +7,11 @@ const SHEET := preload("res://data/characters/adrian.tres")
 const PORTRAIT := preload("res://art/portraits/adrian.png")
 const PORTRAIT_SHADER := preload("res://ui/portrait.gdshader")
 const TIERS := [["STRONG", 10], ["AVERAGE", 8], ["POOR", 6]]
-## [Proposal] One-line descriptions until the perk list is written.
+## Names chosen by Vishnu; the effects are proposals until the perk rules exist.
 const NOTES := {
-	"Defuser": "Can talk a room down before it boils over.",
-	"Still Hands": "Steady fingers when it matters. Locks, wires, triggers.",
-	"Doesn't Look After Himself": "Skips meals, sleep and doctors. Heals slowly.",
+	"Silver Tongue": "+1 die on Eloquence checks to calm or persuade someone.",
+	"Fast Hands": "+1 die on lockpicking, pickpocketing and sleight of hand.",
+	"Poor Self-Esteem": "Takes it to heart. Loses extra Sanity when belittled or blamed.",
 }
 
 signal _closed
