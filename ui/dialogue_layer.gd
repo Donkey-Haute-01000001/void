@@ -5,6 +5,8 @@ extends CanvasLayer
 ## BBCode such as [shake], [wave] and [color]. Choices can carry a timer.
 ## In test mode nothing waits and choices return the test pick.
 
+## Asks the room to shake by this many pixels (dice landings, verdicts).
+signal impact(strength: float)
 signal _advanced
 signal _picked(index: int)
 
@@ -115,65 +117,15 @@ func choose(options: Array, test_pick := 0, timeout := 0.0, default_pick := 0) -
 	return pick
 
 
-## A dice check made visible: each die lands, then the verdict stamps down.
+## A dice check made visible: see DiceRoll. `impact` asks the room to shake.
 func show_check(skill_name: String, result) -> void:
 	if GameState.test_mode:
 		return
-	var panel := PanelContainer.new()
-	panel.add_theme_stylebox_override("panel", Noir.box(Color(0.01, 0.01, 0.015, 0.95), Noir.ACCENT, 34))
-	add_child(panel)
-	var col := VBoxContainer.new()
-	col.alignment = BoxContainer.ALIGNMENT_CENTER
-	col.add_theme_constant_override("separation", 14)
-	panel.add_child(col)
-	var title := Noir.label(skill_name.to_upper(), Noir.TITLE_FONT, 64, Noir.ACCENT)
-	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	col.add_child(title)
-	var rule := Noir.label("%d dice · each lands on %d or under · need %d" % [result.dice, result.skill, result.needed],
-		Noir.BODY_FONT, 22, Noir.DIM)
-	rule.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	col.add_child(rule)
-	var row := HBoxContainer.new()
-	row.alignment = BoxContainer.ALIGNMENT_CENTER
-	row.add_theme_constant_override("separation", 18)
-	col.add_child(row)
-	var stamp := Noir.label("SUCCESS" if result.passed else "FAILURE", Noir.TITLE_FONT, 110,
-		Noir.ACCENT if result.passed else Noir.BLOOD)
-	stamp.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	stamp.modulate.a = 0.0
-	col.add_child(stamp)
-
-	await get_tree().process_frame
-	panel.position = (Vector2(1920, 1080) - panel.size) * 0.5 - Vector2(0, 80)
-
-	for r in result.rolls:
-		var hit: bool = r <= result.skill
-		var die := PanelContainer.new()
-		die.custom_minimum_size = Vector2(96, 96)
-		die.add_theme_stylebox_override("panel", Noir.box(
-			Noir.ACCENT if hit else Color(0.08, 0.08, 0.09), Noir.ACCENT if hit else Color(1, 1, 1, 0.2), 0))
-		var n := Noir.label(str(r), Noir.TITLE_FONT, 64, Noir.INK if hit else Noir.DIM)
-		n.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		n.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		die.add_child(n)
-		row.add_child(die)
-		die.pivot_offset = Vector2(48, 48)
-		die.scale = Vector2(1.6, 1.6)
-		var t := create_tween()
-		t.tween_property(die, "scale", Vector2.ONE, 0.18).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-		await get_tree().create_timer(0.35).timeout
-
-	await get_tree().process_frame
-	stamp.pivot_offset = stamp.size * 0.5
-	stamp.rotation = deg_to_rad(-6)
-	stamp.scale = Vector2(2.4, 2.4)
-	var s := create_tween().set_parallel()
-	s.tween_property(stamp, "scale", Vector2.ONE, 0.16).set_ease(Tween.EASE_IN)
-	s.tween_property(stamp, "modulate:a", 1.0, 0.12)
-	await s.finished
-	_shake(panel)
-	await _wait_for_advance()
-	panel.queue_free()
+	var roll := DiceRoll.new()
+	add_child(roll)
+	roll.impact.connect(func(strength: float): impact.emit(strength))
+	await roll.play(skill_name, result)
+	roll.queue_free()
 
 
 # --- Captions and bubbles ---------------------------------------------------

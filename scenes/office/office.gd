@@ -70,6 +70,7 @@ func _ready() -> void:
 	add_child(story)
 	story.load_script(SCRIPT_PATH)
 	story.speakers = {"adrian": adrian, "tom": tom}
+	story.impact.connect(_shake)
 	hud = Hud.new()
 	add_child(hud)
 	dossier = Dossier.new()
@@ -314,7 +315,7 @@ func _show_end_card() -> void:
 	box.position = Vector2(220, 330)
 	box.add_theme_constant_override("separation", 10)
 	layer.add_child(box)
-	box.add_child(Noir.label("END OF THE OFFICE", Noir.TITLE_FONT, 100, Noir.PAPER))
+	box.add_child(Noir.label("END OF THE OFFICE", Noir.DISPLAY_FONT, 100, Noir.PAPER))
 	box.add_child(Noir.label("NEXT  ·  THE BOSTON CIVIC BALLET", Noir.TITLE_FONT, 44, Noir.ACCENT))
 	box.add_child(Noir.label("Fee agreed: $%d a day and expenses." % GameState.fee_per_day, Noir.NARRATOR_FONT, 30, Noir.DIM))
 	var back := Button.new()

@@ -64,7 +64,7 @@ func _input(event: InputEvent) -> void:
 
 func _build() -> void:
 	var shade := ColorRect.new()
-	shade.color = Color(0.01, 0.01, 0.015, 0.94)
+	shade.color = Color(0.0, 0.0, 0.0, 0.97)
 	shade.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_root.add_child(shade)
 
@@ -94,13 +94,13 @@ func _build() -> void:
 	caption.position = Vector2(20, 522)
 	frame.add_child(caption)
 
-	var title := Noir.label("ADRIAN VALE", Noir.TITLE_FONT, 120, Noir.PAPER)
+	var title := Noir.label("ADRIAN VALE", Noir.DISPLAY_FONT, 110, Noir.PAPER)
 	title.name = "Title"
 	title.position = Vector2(820, 90)
 	title.pivot_offset = Vector2(300, 80)
 	_root.add_child(title)
-	var sub := Noir.label("PRIVATE INVESTIGATOR   ·   24   ·   WORCESTER, MASS.", Noir.TITLE_FONT, 26, Noir.DIM)
-	sub.position = Vector2(826, 250)
+	var sub := Noir.label("PRIVATE INVESTIGATOR   ·   AGE 24   ·   WORCESTER, MASS.", Noir.TITLE_FONT, 40, Noir.SANITY)
+	sub.position = Vector2(826, 228)
 	_root.add_child(sub)
 
 	# Skills in three tiers, highest first. Pips show the value; the outline
@@ -109,32 +109,35 @@ func _build() -> void:
 	names.sort_custom(func(a, b): return SHEET.skills[a] > SHEET.skills[b])
 	for tier in 3:
 		var col := VBoxContainer.new()
-		col.position = Vector2(826 + tier * 360, 330)
-		col.add_theme_constant_override("separation", 6)
+		col.position = Vector2(826 + tier * 360, 310)
+		col.add_theme_constant_override("separation", 4)
 		_root.add_child(col)
-		col.add_child(Noir.label(TIERS[tier][0], Noir.TITLE_FONT, 28, Noir.DIM))
+		col.add_child(Noir.label(TIERS[tier][0], Noir.TITLE_FONT, 32, Noir.BLOOD))
 		for i in 3:
 			var skill: String = names[tier * 3 + i]
 			var value: int = SHEET.skills[skill]
 			var row := HBoxContainer.new()
 			row.add_theme_constant_override("separation", 10)
-			var lbl := Noir.label(skill.to_upper(), Noir.TITLE_FONT, 24, Noir.PAPER)
-			lbl.custom_minimum_size.x = 230
+			var lbl := Noir.label(skill.to_upper(), Noir.TITLE_FONT, 40, Noir.PAPER)
+			lbl.custom_minimum_size.x = 210
 			row.add_child(lbl)
-			row.add_child(Noir.label(str(value), Noir.TITLE_FONT, 24, Noir.ACCENT))
+			row.add_child(Noir.label(str(value), Noir.TITLE_FONT, 40, Noir.ACCENT))
 			col.add_child(row)
 			col.add_child(_pips(value, TIERS[tier][1]))
+			var spacer := Control.new()
+			spacer.custom_minimum_size.y = 8
+			col.add_child(spacer)
 
 	var traits := VBoxContainer.new()
-	traits.position = Vector2(826, 690)
-	traits.add_theme_constant_override("separation", 10)
+	traits.position = Vector2(826, 712)
+	traits.add_theme_constant_override("separation", 14)
 	_root.add_child(traits)
 	for perk in SHEET.perks:
 		traits.add_child(_trait("PERK", perk, Noir.ACCENT))
 	traits.add_child(_trait("FLAW", SHEET.flaw, Noir.BLOOD))
 
-	var hint := Noir.label("CLICK TO CONTINUE", Noir.TITLE_FONT, 26, Noir.DIM)
-	hint.position = Vector2(1640, 1010)
+	var hint := Noir.label("CLICK TO CONTINUE", Noir.TITLE_FONT, 30, Noir.DIM)
+	hint.position = Vector2(1680, 1010)
 	_root.add_child(hint)
 
 
@@ -143,33 +146,38 @@ func _pips(value: int, cap: int) -> Control:
 	row.add_theme_constant_override("separation", 4)
 	for i in 10:
 		var pip := Panel.new()
-		pip.custom_minimum_size = Vector2(22, 10)
+		pip.custom_minimum_size = Vector2(24, 12)
 		var style := StyleBoxFlat.new()
 		if i < value:
 			style.bg_color = Noir.ACCENT
 		elif i < cap:
 			style.bg_color = Color(0, 0, 0, 0)
-			style.border_color = Color(1, 1, 1, 0.3)
+			style.border_color = Color(1, 1, 1, 0.55)
 			style.set_border_width_all(1)
 		else:
-			style.bg_color = Color(1, 1, 1, 0.04)
+			style.bg_color = Color(1, 1, 1, 0.08)
 		pip.add_theme_stylebox_override("panel", style)
 		row.add_child(pip)
 	return row
 
 
+## A perk or flaw: tag and name on one line, what it does underneath.
 func _trait(kind: String, title: String, color: Color) -> Control:
+	var block := VBoxContainer.new()
+	block.add_theme_constant_override("separation", 0)
 	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 16)
-	var tag := Noir.label(kind, Noir.TITLE_FONT, 26, Noir.INK)
+	row.add_theme_constant_override("separation", 14)
+	var tag := Noir.label(kind, Noir.TITLE_FONT, 28, Noir.INK)
 	var tag_box := PanelContainer.new()
-	var style := Noir.box(color, color, 4)
+	var style := Noir.box(color, color, 2)
 	style.content_margin_left = 10
 	style.content_margin_right = 10
 	tag_box.add_theme_stylebox_override("panel", style)
 	tag_box.add_child(tag)
-	tag_box.custom_minimum_size.x = 70
 	row.add_child(tag_box)
-	row.add_child(Noir.label(title.to_upper(), Noir.TITLE_FONT, 24, Noir.PAPER))
-	row.add_child(Noir.label(NOTES.get(title, ""), Noir.BODY_FONT, 18, Noir.DIM))
-	return row
+	row.add_child(Noir.label(title.to_upper(), Noir.TITLE_FONT, 38, Noir.PAPER))
+	block.add_child(row)
+	var note := Noir.label(NOTES.get(title, ""), Noir.BODY_FONT, 24, Noir.SANITY)
+	note.position.x = 0
+	block.add_child(note)
+	return block

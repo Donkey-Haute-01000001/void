@@ -2,13 +2,13 @@
 
 importer="font_data_dynamic"
 type="FontFile"
-uid="uid://buqrm66pqqr4o"
-path="res://.godot/imported/PlayfairDisplay.ttf-db60e7bea2fc7a1031778285cd83a34a.fontdata"
+uid="uid://dy4gwwf6oyjee"
+path="res://.godot/imported/SpecialElite-Regular.ttf-3747d675e9bb16a8b05c51d88dd21da3.fontdata"
 
 [deps]
 
-source_file="res://art/fonts/PlayfairDisplay.ttf"
-dest_files=["res://.godot/imported/PlayfairDisplay.ttf-db60e7bea2fc7a1031778285cd83a34a.fontdata"]
+source_file="res://art/fonts/SpecialElite-Regular.ttf"
+dest_files=["res://.godot/imported/SpecialElite-Regular.ttf-3747d675e9bb16a8b05c51d88dd21da3.fontdata"]
 
 [params]
 

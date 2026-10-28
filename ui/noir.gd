@@ -1,6 +1,6 @@
 class_name Noir
-## Shared look for the UI: Sin City palette (black, white, greys and one red)
-## and art deco type.
+## Shared look for the UI: Sin City palette (black, white, greys and one red).
+## Art deco only on big headlines; everything you read is in plain fonts.
 
 const INK := Color("#060606")
 const PAPER := Color("#ededed")
@@ -12,8 +12,11 @@ const BLOOD := Color("#d01e2a")
 const STEEL := Color("#a8a8a8")
 const SANITY := Color("#c8c8c8")
 
-const TITLE_FONT := preload("res://art/fonts/Limelight-Regular.ttf")
-const NARRATOR_FONT := preload("res://art/fonts/PlayfairDisplay.ttf")
+## Big headlines only: names on cards, check results, end titles.
+const DISPLAY_FONT := preload("res://art/fonts/Limelight-Regular.ttf")
+## Labels, names over speech, HUD.
+const TITLE_FONT := preload("res://art/fonts/BebasNeue-Regular.ttf")
+const NARRATOR_FONT := preload("res://art/fonts/SpecialElite-Regular.ttf")
 const SPEECH_FONT := preload("res://art/fonts/CourierPrime-Bold.ttf")
 const BODY_FONT := preload("res://art/fonts/CourierPrime-Regular.ttf")
 

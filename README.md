@@ -3,7 +3,7 @@
 A 1939 Boston occult-investigation RPG built in Godot. This branch holds the
 first playable piece of the Case 1 proof of concept: **Adrian's office**,
 seen from an isometric camera, in Sin City black and white (red is the only
-colour left) with art deco type. The room and figures are
+colour left), with art deco type on big headlines only. The room and figures are
 placeholder shapes, the portraits are placeholder crops, and all sound is
 generated in code.
 
@@ -26,7 +26,11 @@ choice. Press **C** to open Adrian's dossier.
   no inner voices.
 - A HUD with Adrian's portrait, Health, Sanity and what he is carrying.
 - Katana Zero-style text: narration types out as captions, characters speak in
-  boxes over their heads, and dice checks stamp SUCCESS or FAILURE.
+  boxes over their heads.
+- Dice checks you throw yourself: the dice rattle until you click, tumble and
+  land one by one, successes fill slots with a rising ping, the last die goes
+  slow-motion with a heartbeat when everything rides on it, and the verdict
+  slams down with a flash and a shake.
 - Six objects, three examined. Each choice is remembered for later payoffs.
   Two pay off already: the gin adds a line with Tom, and the bills add a die
   to the fee check. If Adrian takes the pistol, Tom notices it.
@@ -49,7 +53,8 @@ choice. Press **C** to open Adrian's dossier.
 | `ui/dialogue_layer.gd` | Captions, speech boxes, choices (with optional timer) and dice checks. |
 | `ui/hud.gd`, `ui/dossier.gd` | Adrian's HUD card and the full character card. |
 | `art/portraits/` | Placeholder portraits cropped from the character cards. |
-| `art/fonts/` | Limelight, Playfair Display and Courier Prime (free fonts, licences included). |
+| `ui/dice_roll.gd` | The dice check show: throw, tumble, suspense, verdict. Sounds are in `autoload/sfx.gd`. |
+| `art/fonts/` | Limelight (headlines), Bebas Neue, Special Elite and Courier Prime (free fonts, licences included). |
 
 ## Tests
 

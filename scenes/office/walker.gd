@@ -122,13 +122,14 @@ func _draw_shirtsleeves(h: float, w: float) -> void:
 		Vector2(-19 * w, -150 * h), Vector2(19 * w, -150 * h), Vector2(16 * w, -82 * h), Vector2(-16 * w, -82 * h)]), shirt)
 	draw_rect(Rect2(-16 * w, -84 * h, 32 * w, 6 * h), trousers)
 	draw_line(Vector2(0, -150 * h), Vector2(0, -116 * h), Color("#c8141e"), 4.0)
-	# Waistcoat: inside the shirt's outline, open at the shoulders, a V at the
-	# neck and the two points at the waist that sit over the belt.
+	# Waistcoat: covers the shoulders up to the collar, a V at the neck, and
+	# the two points at the waist. Only the shirt sleeves show at the sides.
 	draw_colored_polygon(PackedVector2Array([
-		Vector2(-13 * w, -146 * h), Vector2(-5 * w, -146 * h), Vector2(0, -122 * h), Vector2(5 * w, -146 * h),
-		Vector2(13 * w, -146 * h), Vector2(16 * w, -132 * h), Vector2(15 * w, -80 * h), Vector2(8 * w, -74 * h),
-		Vector2(0, -79 * h), Vector2(-8 * w, -74 * h), Vector2(-15 * w, -80 * h), Vector2(-16 * w, -132 * h)]), vest)
-	draw_line(Vector2(0, -122 * h), Vector2(0, -79 * h), vest.darkened(0.5), 1.0)
+		Vector2(-6 * w, -152 * h), Vector2(0, -124 * h), Vector2(6 * w, -152 * h),
+		Vector2(17 * w, -149 * h), Vector2(17 * w, -132 * h), Vector2(15 * w, -82 * h), Vector2(8 * w, -76 * h),
+		Vector2(0, -81 * h), Vector2(-8 * w, -76 * h), Vector2(-15 * w, -82 * h), Vector2(-17 * w, -132 * h),
+		Vector2(-17 * w, -149 * h)]), vest)
+	draw_line(Vector2(0, -124 * h), Vector2(0, -81 * h), vest.darkened(0.5), 1.0)
 	for i in 4:
 		draw_circle(Vector2(2, (-114 + i * 10) * h), 1.5, Color("#9a9a9a"))
 	# Sleeves rolled to the elbow.
