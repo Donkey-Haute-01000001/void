@@ -12,6 +12,7 @@ func _ready() -> void:
 	_test_sheets()
 	_test_save_roundtrip()
 	await _test_office_flow()
+	await _test_voices()
 	print("\n%s" % ("ALL TESTS PASSED" if _failures == 0 else "%d FAILURE(S)" % _failures))
 	get_tree().quit(1 if _failures > 0 else 0)
 
@@ -100,3 +101,24 @@ func _test_office_flow() -> void:
 	_check(GameState.has_flag("has_knife") and GameState.items() == ["Folding knife"], "examining the coat pockets the knife")
 	again.queue_free()
 	SaveSystem.delete_save()
+
+
+## Inner voices: script lines route to voices, passives roll, arguments pick.
+func _test_voices() -> void:
+	var story := DialogueLayer.new()
+	add_child(story)
+	story.load_script("res://data/script/office.json")
+	story.load_script("res://data/script/voice_demo.json")
+	_check(story.lines.has("intro_1") and story.lines.has("demo_psy_passive"), "a second script adds to the first")
+	var bad := []
+	for id in story.lines:
+		var speaker: String = story.lines[id]["speaker"]
+		if speaker.begins_with("voice:") and not load("res://data/characters/adrian.tres").skills.has(speaker.trim_prefix("voice:")):
+			bad.append(id)
+	_check(bad.is_empty(), "every voice line names a real skill %s" % [bad])
+	story.sheet = load("res://data/characters/adrian.tres")
+	_check(await story.passive("psychology", -10, "demo_psy_passive"), "an easy passive always speaks")
+	_check(not await story.passive("occultism", 5, "demo_psy_passive"), "an impossible passive stays quiet")
+	_check(await story.argue(["demo_elo_1", "demo_psy_1"], ["a", "b"], 1) == 1, "an argument returns the side picked")
+	_check(DialogueLayer.skill_option("psychology", "Hi") == "[PSYCHOLOGY]  Hi", "skill options carry their tag")
+	story.queue_free()

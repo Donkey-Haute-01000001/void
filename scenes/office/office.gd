@@ -4,6 +4,7 @@ extends Node2D
 ## placeholder shapes; lighting, text and layout are the real thing.
 
 const SCRIPT_PATH := "res://data/script/office.json"
+const VOICE_DEMO_PATH := "res://data/script/voice_demo.json"
 const ADRIAN_SHEET := preload("res://data/characters/adrian.tres")
 const RoomArt := preload("res://scenes/office/room_art.gd")
 const SCREEN_FX := preload("res://ui/screen_fx.gdshader")
@@ -70,6 +71,7 @@ func _ready() -> void:
 	add_child(story)
 	story.load_script(SCRIPT_PATH)
 	story.speakers = {"adrian": adrian, "tom": tom}
+	story.sheet = ADRIAN_SHEET
 	story.impact.connect(_shake)
 	hud = Hud.new()
 	add_child(hud)
@@ -78,6 +80,9 @@ func _ready() -> void:
 
 	Sfx.start_rain()
 	match GameState.checkpoint:
+		"voice_demo":
+			hud.show_hud(false, true)
+			_voice_demo()
 		"knock":
 			hud.show_hud(false, true)
 			_knock_sequence()
@@ -268,6 +273,46 @@ func _knock_sequence() -> void:
 	await story.say("end_2")
 	SaveSystem.autosave("office_done")
 	_show_end_card()
+
+
+## A test scene for the inner voices, reached from the title screen. Not
+## part of the story and never saved.
+func _voice_demo() -> void:
+	_busy = true
+	story.load_script(VOICE_DEMO_PATH)
+	_room.door_open = true
+	adrian.place(ADRIAN_TALK)
+	tom.place(TOM_STAND)
+	tom.visible = true
+	adrian.face_toward(tom.world)
+	tom.face_toward(adrian.world)
+	_letterbox(true, true)
+	await story.say("demo_intro")
+	await story.say("demo_tom_1")
+	# A sure passive (for the demo) and a coin-flip one.
+	await story.passive("psychology", -10, "demo_psy_passive")
+	await story.passive("investigation", 3, "demo_inv_passive")
+	var pick := await story.choose([
+		DialogueLayer.skill_option("psychology", "\"You don't like this job either.\""),
+		"\"Nothing. Go.\"",
+	])
+	if pick == 0:
+		await story.say("demo_ask_like")
+		await story.say("demo_tom_like")
+	var side := await story.argue(["demo_elo_1", "demo_psy_1", "demo_elo_2", "demo_psy_2"], [
+		"Side with ELOQUENCE: ask about the war.",
+		"Side with PSYCHOLOGY: let him go.",
+	])
+	if side == 0:
+		await story.say("demo_ask_war")
+		await story.say("demo_tom_war")
+		await story.say("demo_narr_war")
+	else:
+		await story.say("demo_tom_go")
+		await story.say("demo_narr_go")
+	await story.say("demo_end")
+	GameState.reset()
+	get_tree().change_scene_to_file("res://scenes/title/title.tscn")
 
 
 ## Pushing the fee is a visible Eloquence check. The bills add a die.

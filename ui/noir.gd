@@ -19,6 +19,8 @@ const TITLE_FONT := preload("res://art/fonts/BebasNeue-Regular.ttf")
 const NARRATOR_FONT := preload("res://art/fonts/SpecialElite-Regular.ttf")
 const SPEECH_FONT := preload("res://art/fonts/CourierPrime-Bold.ttf")
 const BODY_FONT := preload("res://art/fonts/CourierPrime-Regular.ttf")
+## Inner voices: italic, so they never read as spoken aloud.
+const VOICE_FONT := preload("res://art/fonts/CourierPrime-Italic.ttf")
 
 ## Name-tag colour for each speaker.
 const SPEAKER_COLORS := {"adrian": ACCENT, "tom": STEEL}

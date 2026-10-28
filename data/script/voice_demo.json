@@ -1,0 +1,21 @@
+{
+	"_readme": "VOICE DEMO ONLY. Not part of the story: a test scene that shows Adrian's inner voices. Speakers voice:<skill> are inner voices.",
+	"lines": {
+		"demo_intro": {"speaker": "narrator", "text": "[color=#8a8a8a]VOICE DEMO. Not part of the story: a test of Adrian's inner voices.[/color]"},
+		"demo_tom_1": {"speaker": "tom", "text": "Anything else, Vale?"},
+		"demo_psy_passive": {"speaker": "voice:psychology", "text": "He's sizing you up. Not for the job. For whatever comes after it."},
+		"demo_inv_passive": {"speaker": "voice:investigation", "text": "Fresh scrape across his knuckles. Someone told him no this morning."},
+		"demo_ask_like": {"speaker": "adrian", "text": "You don't like this job either."},
+		"demo_tom_like": {"speaker": "tom", "text": "I don't have to like it."},
+		"demo_elo_1": {"speaker": "voice:eloquence", "text": "Keep him talking. Men like him love to be asked about the war."},
+		"demo_psy_1": {"speaker": "voice:psychology", "text": "Don't. He's a shut door. Push and you lose him."},
+		"demo_elo_2": {"speaker": "voice:eloquence", "text": "Every door opens if you knock right."},
+		"demo_psy_2": {"speaker": "voice:psychology", "text": "[shake rate=10 level=5]Not this one.[/shake]"},
+		"demo_ask_war": {"speaker": "adrian", "text": "You were over there, weren't you? France."},
+		"demo_tom_war": {"speaker": "tom", "text": "No."},
+		"demo_narr_war": {"speaker": "narrator", "text": "The room dropped a degree. Garrity's hand went still at his side."},
+		"demo_tom_go": {"speaker": "tom", "text": "Vale."},
+		"demo_narr_go": {"speaker": "narrator", "text": "He nodded once and left. Something close to respect."},
+		"demo_end": {"speaker": "narrator", "text": "[color=#8a8a8a]End of the voice demo.[/color]"}
+	}
+}

@@ -3,6 +3,8 @@ extends CanvasLayer
 ## Katana Zero-style text. The narrator types out as a caption in the lower
 ## third; characters speak in black boxes over their heads. Lines support
 ## BBCode such as [shake], [wave] and [color]. Choices can carry a timer.
+## Inner voices (Adrian's skills talking) appear as grey, borderless boxes
+## beside his head; script lines with speaker "voice:<skill>" go there.
 ## In test mode nothing waits and choices return the test pick.
 
 ## Asks the room to shake by this many pixels (dice landings, verdicts).
@@ -17,6 +19,9 @@ const HEAD_OFFSET := Vector2(0, -250)
 ## Speaker id -> the Node2D their bubble floats over.
 var speakers: Dictionary = {}
 var lines: Dictionary = {}
+## Whose head the inner voices sit beside, and whose skills they speak for.
+var listener := "adrian"
+var sheet: CharacterSheet
 
 var _vo := AudioStreamPlayer.new()
 var _mode := ""  # "", "typing" or "wait"
@@ -30,6 +35,10 @@ var _bubble_text: RichTextLabel
 var _tail: Polygon2D
 var _bubble_owner: Node2D
 var _hint: Label
+var _voice: PanelContainer
+var _voice_tag: Label
+var _voice_text: RichTextLabel
+var _voice_side := -1  # -1 left of the head, 1 right of it
 
 
 func _ready() -> void:
@@ -37,30 +46,62 @@ func _ready() -> void:
 	add_child(_vo)
 	_build_caption()
 	_build_bubble()
+	_build_voice()
 	_hint = Noir.label("▸", Noir.TITLE_FONT, 34, Noir.ACCENT)
 	_hint.visible = false
 	add_child(_hint)
 
 
+## Load a script file's lines. Later files add to (and override) earlier ones.
 func load_script(path: String) -> void:
 	var data: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
-	lines = data["lines"] if data is Dictionary else {}
+	if data is Dictionary:
+		lines.merge(data["lines"], true)
 
 
-## Show a scripted line by id and wait for the player to move on.
-func say(id: String) -> void:
+## Show a scripted line by id and wait for the player to move on. `note`
+## is added to an inner voice's tag, such as "PASSIVE".
+func say(id: String, note := "") -> void:
 	var line: Dictionary = lines.get(id, {"speaker": "narrator", "text": "[missing line: %s]" % id})
-	await say_text(line["speaker"], line["text"], id)
+	await say_text(line["speaker"], line["text"], id, note)
 
 
-func say_text(speaker: String, text: String, vo_id := "") -> void:
+func say_text(speaker: String, text: String, vo_id := "", note := "") -> void:
 	_play_vo(vo_id)
 	if GameState.test_mode:
 		return
-	if speaker == "narrator" or not speakers.has(speaker):
+	if speaker.begins_with("voice:"):
+		await _show_voice(speaker.trim_prefix("voice:"), text, note)
+	elif speaker == "narrator" or not speakers.has(speaker):
 		await _show_caption(text)
 	else:
 		await _show_bubble(speaker, text)
+
+
+## A passive check: a hidden one-die roll on the listener's skill, made
+## harder by `difficulty`. If it lands, the voice says line `id`. Returns
+## whether it spoke, so the scene can react.
+func passive(skill: String, difficulty: int, id: String) -> bool:
+	var value := sheet.get_skill(skill) if sheet else 0
+	var result = Dice.roll(maxi(value - difficulty, 0), 1, 1)
+	if result.passed:
+		await say(id, "PASSIVE")
+	return result.passed
+
+
+## Two (or more) voices argue, alternating sides of his head, then the player
+## sides with one. `ids` are script line ids; returns the option picked.
+func argue(ids: Array, options: Array, test_pick := 0) -> int:
+	for i in ids.size():
+		_voice_side = -1 if i % 2 == 0 else 1
+		await say(ids[i])
+	_voice_side = -1
+	return await choose(options, test_pick)
+
+
+## A choice unlocked by a skill, tagged so the player sees why it's there.
+static func skill_option(skill: String, text: String) -> String:
+	return "[%s]  %s" % [skill.to_upper(), text]
 
 
 ## Offer choices. A timeout above zero runs a shrinking bar; when it empties
@@ -159,12 +200,32 @@ func _show_bubble(speaker: String, text: String) -> void:
 	_bubble_owner = null
 
 
+func _show_voice(skill: String, text: String, note: String) -> void:
+	var value := sheet.get_skill(skill) if sheet else 0
+	_voice_tag.text = "%s · %d" % [skill.to_upper(), value] + ("   ·   " + note if note != "" else "")
+	_voice_text.text = "[i]%s[/i]" % text
+	_voice.size = Vector2.ZERO
+	_voice.visible = true
+	_voice.modulate.a = 0.0
+	await get_tree().process_frame
+	var head: Vector2 = speakers[listener].get_global_transform_with_canvas().origin + HEAD_OFFSET + Vector2(0, 90)
+	var pos := Vector2(head.x - _voice.size.x - 46 if _voice_side < 0 else head.x + 46, head.y - _voice.size.y * 0.5)
+	pos.x = clampf(pos.x, 24, 1920 - 24 - _voice.size.x)
+	pos.y = clampf(pos.y, 24, 1080 - 24 - _voice.size.y)
+	_voice.position = pos + Vector2(24 * _voice_side, 0)
+	var t := create_tween().set_parallel()
+	t.tween_property(_voice, "modulate:a", 1.0, 0.15)
+	t.tween_property(_voice, "position", pos, 0.15).set_ease(Tween.EASE_OUT)
+	await _type(_voice_text)
+	_voice.visible = false
+
+
 func _process(_delta: float) -> void:
 	if _bubble_owner and _bubble.visible:
 		_place_bubble()
-	_hint.visible = _mode == "wait" and (_bubble.visible or _caption.visible)
+	_hint.visible = _mode == "wait" and (_bubble.visible or _caption.visible or _voice.visible)
 	if _hint.visible:
-		var target: Control = _bubble if _bubble.visible else _caption
+		var target: Control = _bubble if _bubble.visible else (_voice if _voice.visible else _caption)
 		_hint.position = target.position + target.size - Vector2(30, 46)
 		_hint.modulate.a = 0.5 + 0.5 * sin(Time.get_ticks_msec() * 0.008)
 
@@ -266,3 +327,20 @@ func _build_bubble() -> void:
 	_bubble_text.custom_minimum_size.x = BUBBLE_WIDTH
 	col.add_child(_bubble_text)
 	add_child(_bubble)
+
+
+func _build_voice() -> void:
+	_voice = PanelContainer.new()
+	_voice.add_theme_stylebox_override("panel", Noir.box(Color(0.16, 0.16, 0.17, 0.94), Color(0, 0, 0, 0), 18))
+	_voice.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_voice.visible = false
+	var col := VBoxContainer.new()
+	col.add_theme_constant_override("separation", 4)
+	_voice.add_child(col)
+	_voice_tag = Noir.label("", Noir.TITLE_FONT, 26, Noir.DIM)
+	col.add_child(_voice_tag)
+	_voice_text = Noir.rich(Noir.SPEECH_FONT, 28, Color("#d6d6d6"))
+	_voice_text.add_theme_font_override("italics_font", Noir.VOICE_FONT)
+	_voice_text.custom_minimum_size.x = 460
+	col.add_child(_voice_text)
+	add_child(_voice)
