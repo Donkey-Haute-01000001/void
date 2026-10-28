@@ -2,7 +2,8 @@
 
 A 1939 Boston occult-investigation RPG built in Godot. This branch holds the
 first playable piece of the Case 1 proof of concept: **Adrian's office**,
-seen from an isometric camera and lit like a noir. The room and figures are
+seen from an isometric camera, in Sin City black and white (red is the only
+colour left) with art deco type. The room and figures are
 placeholder shapes, the portraits are placeholder crops, and all sound is
 generated in code.
 
@@ -48,7 +49,7 @@ choice. Press **C** to open Adrian's dossier.
 | `ui/dialogue_layer.gd` | Captions, speech boxes, choices (with optional timer) and dice checks. |
 | `ui/hud.gd`, `ui/dossier.gd` | Adrian's HUD card and the full character card. |
 | `art/portraits/` | Placeholder portraits cropped from the character cards. |
-| `art/fonts/` | Special Elite, Bebas Neue and Courier Prime (free fonts, licences included). |
+| `art/fonts/` | Limelight, Playfair Display and Courier Prime (free fonts, licences included). |
 
 ## Tests
 

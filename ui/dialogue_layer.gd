@@ -35,7 +35,7 @@ func _ready() -> void:
 	add_child(_vo)
 	_build_caption()
 	_build_bubble()
-	_hint = Noir.label("▸", Noir.TITLE_FONT, 34, Noir.AMBER)
+	_hint = Noir.label("▸", Noir.TITLE_FONT, 34, Noir.ACCENT)
 	_hint.visible = false
 	add_child(_hint)
 
@@ -85,12 +85,12 @@ func choose(options: Array, test_pick := 0, timeout := 0.0, default_pick := 0) -
 		b.add_theme_font_override("font", Noir.SPEECH_FONT)
 		b.add_theme_font_size_override("font_size", 28)
 		b.add_theme_color_override("font_color", Noir.PAPER)
-		b.add_theme_color_override("font_hover_color", Noir.AMBER)
-		b.add_theme_color_override("font_focus_color", Noir.AMBER)
+		b.add_theme_color_override("font_hover_color", Noir.ACCENT)
+		b.add_theme_color_override("font_focus_color", Noir.ACCENT)
 		b.add_theme_stylebox_override("normal", Noir.box(Color(0.02, 0.02, 0.03, 0.9), Color(1, 1, 1, 0.12), 14))
-		b.add_theme_stylebox_override("hover", Noir.box(Color(0.06, 0.05, 0.03, 0.95), Noir.AMBER, 14))
-		b.add_theme_stylebox_override("focus", Noir.box(Color(0.06, 0.05, 0.03, 0.95), Noir.AMBER, 14))
-		b.add_theme_stylebox_override("pressed", Noir.box(Color(0.1, 0.08, 0.04, 0.95), Noir.AMBER, 14))
+		b.add_theme_stylebox_override("hover", Noir.box(Color(0.06, 0.05, 0.03, 0.95), Noir.ACCENT, 14))
+		b.add_theme_stylebox_override("focus", Noir.box(Color(0.06, 0.05, 0.03, 0.95), Noir.ACCENT, 14))
+		b.add_theme_stylebox_override("pressed", Noir.box(Color(0.1, 0.08, 0.04, 0.95), Noir.ACCENT, 14))
 		b.pressed.connect(func(): _picked.emit(i))
 		root.add_child(b)
 		b.modulate.a = 0.0
@@ -120,13 +120,13 @@ func show_check(skill_name: String, result) -> void:
 	if GameState.test_mode:
 		return
 	var panel := PanelContainer.new()
-	panel.add_theme_stylebox_override("panel", Noir.box(Color(0.01, 0.01, 0.015, 0.95), Noir.AMBER, 34))
+	panel.add_theme_stylebox_override("panel", Noir.box(Color(0.01, 0.01, 0.015, 0.95), Noir.ACCENT, 34))
 	add_child(panel)
 	var col := VBoxContainer.new()
 	col.alignment = BoxContainer.ALIGNMENT_CENTER
 	col.add_theme_constant_override("separation", 14)
 	panel.add_child(col)
-	var title := Noir.label(skill_name.to_upper(), Noir.TITLE_FONT, 64, Noir.AMBER)
+	var title := Noir.label(skill_name.to_upper(), Noir.TITLE_FONT, 64, Noir.ACCENT)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	col.add_child(title)
 	var rule := Noir.label("%d dice · each lands on %d or under · need %d" % [result.dice, result.skill, result.needed],
@@ -138,7 +138,7 @@ func show_check(skill_name: String, result) -> void:
 	row.add_theme_constant_override("separation", 18)
 	col.add_child(row)
 	var stamp := Noir.label("SUCCESS" if result.passed else "FAILURE", Noir.TITLE_FONT, 110,
-		Noir.AMBER if result.passed else Noir.BLOOD)
+		Noir.ACCENT if result.passed else Noir.BLOOD)
 	stamp.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	stamp.modulate.a = 0.0
 	col.add_child(stamp)
@@ -151,7 +151,7 @@ func show_check(skill_name: String, result) -> void:
 		var die := PanelContainer.new()
 		die.custom_minimum_size = Vector2(96, 96)
 		die.add_theme_stylebox_override("panel", Noir.box(
-			Noir.AMBER if hit else Color(0.08, 0.08, 0.09), Noir.AMBER if hit else Color(1, 1, 1, 0.2), 0))
+			Noir.ACCENT if hit else Color(0.08, 0.08, 0.09), Noir.ACCENT if hit else Color(1, 1, 1, 0.2), 0))
 		var n := Noir.label(str(r), Noir.TITLE_FONT, 64, Noir.INK if hit else Noir.DIM)
 		n.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		n.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
@@ -308,7 +308,7 @@ func _build_bubble() -> void:
 	var col := VBoxContainer.new()
 	col.add_theme_constant_override("separation", 4)
 	_bubble.add_child(col)
-	_bubble_name = Noir.label("", Noir.TITLE_FONT, 30, Noir.AMBER)
+	_bubble_name = Noir.label("", Noir.TITLE_FONT, 30, Noir.ACCENT)
 	col.add_child(_bubble_name)
 	_bubble_text = Noir.rich(Noir.SPEECH_FONT, 30, Noir.PAPER)
 	_bubble_text.custom_minimum_size.x = BUBBLE_WIDTH

@@ -7,6 +7,7 @@ const SCRIPT_PATH := "res://data/script/office.json"
 const ADRIAN_SHEET := preload("res://data/characters/adrian.tres")
 const RoomArt := preload("res://scenes/office/room_art.gd")
 const SCREEN_FX := preload("res://ui/screen_fx.gdshader")
+const SIN_CITY := preload("res://ui/sin_city.gdshader")
 
 const CELL := 0.25
 const ADRIAN_START := Vector2(6.5, 1.4)
@@ -27,14 +28,14 @@ const HOTSPOTS := {
 ## Floor areas nothing can walk through: x, y, width, depth in tiles.
 const BLOCKERS := [
 	Rect2(3.4, 2.4, 2.6, 1.2),  # desk
-	Rect2(4.5, 1.2, 0.8, 0.8),  # desk chair
+	Rect2(4.35, 1.45, 0.7, 0.7),  # desk chair
 	Rect2(2.0, 0.0, 1.4, 0.6),  # bookcase
 	Rect2(7.0, 0.0, 1.9, 0.95),  # couch
 	Rect2(6.55, 3.45, 0.28, 0.28),  # waste bin
-	Rect2(4.2, 4.4, 0.7, 0.8),  # client chair
+	Rect2(4.2, 4.4, 0.7, 0.7),  # client chair
 	Rect2(0.7, 0.0, 0.9, 0.85),  # filing cabinet
 	Rect2(0.0, 3.85, 0.6, 0.55),  # coat rack
-	Rect2(4.2, 0.0, 2.2, 0.35),  # radiator
+	Rect2(4.4, 0.0, 1.8, 0.3),  # radiator
 ]
 
 var story: DialogueLayer
@@ -313,8 +314,8 @@ func _show_end_card() -> void:
 	box.position = Vector2(220, 330)
 	box.add_theme_constant_override("separation", 10)
 	layer.add_child(box)
-	box.add_child(Noir.label("END OF THE OFFICE", Noir.TITLE_FONT, 140, Noir.PAPER))
-	box.add_child(Noir.label("NEXT  ·  THE BOSTON CIVIC BALLET", Noir.TITLE_FONT, 44, Noir.AMBER))
+	box.add_child(Noir.label("END OF THE OFFICE", Noir.TITLE_FONT, 100, Noir.PAPER))
+	box.add_child(Noir.label("NEXT  ·  THE BOSTON CIVIC BALLET", Noir.TITLE_FONT, 44, Noir.ACCENT))
 	box.add_child(Noir.label("Fee agreed: $%d a day and expenses." % GameState.fee_per_day, Noir.NARRATOR_FONT, 30, Noir.DIM))
 	var back := Button.new()
 	back.text = "RETURN TO TITLE"
@@ -322,10 +323,10 @@ func _show_end_card() -> void:
 	back.add_theme_font_override("font", Noir.TITLE_FONT)
 	back.add_theme_font_size_override("font_size", 34)
 	back.add_theme_color_override("font_color", Noir.PAPER)
-	back.add_theme_color_override("font_hover_color", Noir.AMBER)
+	back.add_theme_color_override("font_hover_color", Noir.ACCENT)
 	back.add_theme_stylebox_override("normal", Noir.box(Color(0, 0, 0, 0), Color(1, 1, 1, 0.3), 12))
-	back.add_theme_stylebox_override("hover", Noir.box(Color(0, 0, 0, 0), Noir.AMBER, 12))
-	back.add_theme_stylebox_override("focus", Noir.box(Color(0, 0, 0, 0), Noir.AMBER, 12))
+	back.add_theme_stylebox_override("hover", Noir.box(Color(0, 0, 0, 0), Noir.ACCENT, 12))
+	back.add_theme_stylebox_override("focus", Noir.box(Color(0, 0, 0, 0), Noir.ACCENT, 12))
 	back.pressed.connect(func(): get_tree().change_scene_to_file("res://scenes/title/title.tscn"))
 	var spacer := Control.new()
 	spacer.custom_minimum_size.y = 40
@@ -429,7 +430,7 @@ func _set_hover(id: String) -> void:
 	box.queue_redraw()
 	var done := GameState.has_examined(id)
 	_hover_label.text = HOTSPOTS[id]["label"].to_upper() + ("   ·   SEEN" if done else "")
-	_hover_label.add_theme_color_override("font_color", Noir.DIM if done else Noir.AMBER)
+	_hover_label.add_theme_color_override("font_color", Noir.DIM if done else Noir.ACCENT)
 	_hover_label.reset_size()
 	_hover_label.position = box.top_center() - Vector2(_hover_label.size.x * 0.5, 70)
 
@@ -451,16 +452,38 @@ func _box(parent: Node, at: Vector3, size: Vector3, color: Color, drawers := 0) 
 	b.drawers = drawers
 	b.setup(at, size, color)
 	parent.add_child(b)
-	if parent is IsoBox:
-		b.position -= (parent as IsoBox).position
+	if parent != _world:
+		b.position -= (parent as Node2D).position
 	return b
+
+
+## A wooden chair on four legs. `back_far` puts the backrest on the side away
+## from the camera (a chair facing us); otherwise it is nearest the camera.
+func _chair(at: Vector2, back_far: bool) -> void:
+	const S := 0.7
+	const LEG := 0.06
+	const SEAT := 0.42
+	var wood := Color("#4a3a30")
+	var holder := Node2D.new()
+	holder.position = Iso.ground(at + Vector2(S, S))
+	_world.add_child(holder)
+	var back_y := at.y if back_far else at.y + S - 0.1
+	# Far leg first, then the seat, then the legs and back in front of it.
+	_box(holder, Vector3(at.x, at.y, 0), Vector3(LEG, LEG, SEAT), wood.darkened(0.3))
+	if back_far:
+		_box(holder, Vector3(at.x, back_y, SEAT), Vector3(S, 0.1, 0.62), wood.darkened(0.1))
+	_box(holder, Vector3(at.x, at.y, SEAT), Vector3(S, S, 0.07), wood)
+	for leg in [Vector2(S - LEG, 0), Vector2(0, S - LEG), Vector2(S - LEG, S - LEG)]:
+		_box(holder, Vector3(at.x + leg.x, at.y + leg.y, 0), Vector3(LEG, LEG, SEAT), wood.darkened(0.3))
+	if not back_far:
+		_box(holder, Vector3(at.x, back_y, SEAT + 0.07), Vector3(S, 0.1, 0.6), wood.darkened(0.1))
 
 
 func _prop(parent: Node, kind: String, anchor: Vector3) -> IsoProp:
 	var p := IsoProp.new().setup(kind, anchor)
 	parent.add_child(p)
-	if parent is IsoBox:
-		p.position -= (parent as IsoBox).position
+	if parent != _world:
+		p.position -= (parent as Node2D).position
 	return p
 
 
@@ -484,21 +507,17 @@ func _build_stage() -> void:
 
 	# Furniture.
 	_boxes["gin"] = _box(_world, Vector3(0.7, 0.05, 0), Vector3(0.9, 0.7, 1.6), Color("#4e504c"), 3)
-	_box(_world, Vector3(4.2, 0.05, 0), Vector3(2.2, 0.25, 0.6), Color("#45453f"))
 	var shelf := _box(_world, Vector3(2.0, 0.05, 0), Vector3(1.4, 0.55, 1.2), Color("#3e2a1c"))
 	_prop(shelf, "books", Vector3(3.4, 0.6, 0))
 	_prop(shelf, "radio", Vector3(3.4, 0.6, 0))
-	# The desk chair, pushed back and turned toward the window.
-	_box(_world, Vector3(4.5, 1.2, 0.5), Vector3(0.8, 0.14, 0.75), Color("#3a2416"))
-	_box(_world, Vector3(4.5, 1.2, 0), Vector3(0.8, 0.8, 0.5), Color("#4a2e1c"))
+	_chair(Vector2(4.35, 1.45), true)
 	var desk := _box(_world, Vector3(3.4, 2.4, 0), Vector3(2.6, 1.2, 0.75), Color("#7a5236"), 0)
-	_box(_world, Vector3(4.2, 4.4, 0), Vector3(0.7, 0.7, 0.45), Color("#4a2e1c"))
-	_box(_world, Vector3(4.2, 5.08, 0.45), Vector3(0.7, 0.12, 0.65), Color("#3a2416"))
+	_chair(Vector2(4.2, 4.4), false)
 	# The couch he slept on, under the clock.
-	_box(_world, Vector3(7.0, 0.05, 0), Vector3(1.9, 0.9, 0.42), Color("#5a2224"))
-	_box(_world, Vector3(7.0, 0.05, 0.42), Vector3(1.9, 0.25, 0.5), Color("#4a1a1c"))
-	_box(_world, Vector3(7.0, 0.3, 0.42), Vector3(0.18, 0.65, 0.18), Color("#4a1a1c"))
-	_box(_world, Vector3(8.72, 0.3, 0.42), Vector3(0.18, 0.65, 0.18), Color("#4a1a1c"))
+	_box(_world, Vector3(7.0, 0.05, 0), Vector3(1.9, 0.9, 0.42), Color("#34302e"))
+	_box(_world, Vector3(7.0, 0.05, 0.42), Vector3(1.9, 0.25, 0.5), Color("#2a2624"))
+	_box(_world, Vector3(7.0, 0.3, 0.42), Vector3(0.18, 0.65, 0.18), Color("#2a2624"))
+	_box(_world, Vector3(8.72, 0.3, 0.42), Vector3(0.18, 0.65, 0.18), Color("#2a2624"))
 	_prop(_world, "blanket", Vector3(8.9, 1.0, 0))
 	# Waste bin and the drafts that missed it.
 	_box(_world, Vector3(6.55, 3.45, 0), Vector3(0.28, 0.28, 0.38), Color("#3a3a3a"))
@@ -540,13 +559,13 @@ func _build_stage() -> void:
 	tom.place(DOOR_POINT)
 
 	var dark := CanvasModulate.new()
-	dark.color = Color(0.36, 0.38, 0.5)
+	dark.color = Color(0.44, 0.44, 0.46)
 	_stage.add_child(dark)
 
-	_lamp = _light(Iso.to_screen(Vector3(3.7, 2.7, 0.9)), Color(1.0, 0.78, 0.45), 1.35, 4.2)
+	_lamp = _light(Iso.to_screen(Vector3(3.7, 2.7, 0.9)), Color(1.0, 0.96, 0.9), 1.45, 4.2)
 	_window_light = _light(Iso.to_screen(Vector3(5.0, 2.4, 0.0)), Color(0.55, 0.68, 1.0), 0.55, 6.0)
 
-	_hover_label = Noir.label("", Noir.TITLE_FONT, 34, Noir.AMBER)
+	_hover_label = Noir.label("", Noir.TITLE_FONT, 34, Noir.ACCENT)
 	_hover_label.add_theme_color_override("font_outline_color", Color.BLACK)
 	_hover_label.add_theme_constant_override("outline_size", 10)
 	_hover_label.visible = false
@@ -605,6 +624,18 @@ func _draw_blind_light() -> void:
 # --- Screen effects ---------------------------------------------------------
 
 func _build_screen_fx() -> void:
+	# Black and white over the room; only strong reds survive.
+	var grade_layer := CanvasLayer.new()
+	grade_layer.layer = 9
+	add_child(grade_layer)
+	var bw := ColorRect.new()
+	bw.set_anchors_preset(Control.PRESET_FULL_RECT)
+	bw.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var bw_mat := ShaderMaterial.new()
+	bw_mat.shader = SIN_CITY
+	bw.material = bw_mat
+	grade_layer.add_child(bw)
+
 	var fx := CanvasLayer.new()
 	fx.layer = 10
 	add_child(fx)

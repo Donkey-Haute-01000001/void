@@ -154,8 +154,41 @@ func _draw_blanket() -> void:
 
 
 func _draw_papers() -> void:
-	# Crumpled drafts that missed the bin.
-	for spot in [Vector2(6.55, 3.85), Vector2(6.85, 3.3), Vector2(6.3, 4.2), Vector2(7.05, 4.0)]:
-		var c := _p(spot.x, spot.y, 0.0)
-		draw_circle(c + Vector2(0, -6), 7.0, Color("#d8d2c4"))
-		draw_line(c + Vector2(-4, -8), c + Vector2(3, -4), Color("#a8a294"), 1.5)
+	# Crumpled drafts that missed the bin: jagged balls with creases, lit from
+	# the top, plus one sheet that was only half screwed up.
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 39
+	var balls := [[Vector2(6.5, 3.95), 14.0], [Vector2(6.9, 3.3), 11.0], [Vector2(6.25, 4.25), 12.0],
+		[Vector2(7.1, 4.05), 15.0], [Vector2(6.75, 4.45), 10.0]]
+	for b in balls:
+		var r: float = b[1]
+		var c: Vector2 = _p(b[0].x, b[0].y, 0.0) + Vector2(0, -r * 0.75)
+		draw_set_transform(_p(b[0].x, b[0].y, 0.0), 0.0, Vector2(1, 0.4))
+		draw_circle(Vector2.ZERO, r * 1.1, Color(0, 0, 0, 0.5))
+		draw_set_transform(Vector2.ZERO)
+		var outline := PackedVector2Array()
+		for i in 14:
+			var a := TAU * i / 14.0
+			outline.append(c + Vector2(cos(a), sin(a) * 0.85) * r * rng.randf_range(0.72, 1.12))
+		# Facets: each wedge catches the light differently, brighter on top.
+		var core := c + Vector2(rng.randf_range(-2, 2), rng.randf_range(-2, 1))
+		for i in outline.size():
+			var p1 := outline[i]
+			var p2 := outline[(i + 1) % outline.size()]
+			var up := -((p1 + p2) * 0.5 - c).normalized().y
+			var shade := clampf(0.5 + up * 0.25 + rng.randf_range(-0.18, 0.18), 0.2, 0.85)
+			draw_colored_polygon(PackedVector2Array([core, p1, p2]), Color(shade, shade, shade * 0.97))
+		for i in 5:
+			var from := c + Vector2(rng.randf_range(-r, r), rng.randf_range(-r, r)) * 0.55
+			var mid := from + Vector2(rng.randf_range(-r, r), rng.randf_range(-r, r)) * 0.45
+			draw_polyline(PackedVector2Array([from, mid, mid + Vector2(rng.randf_range(-5, 5), rng.randf_range(-5, 5))]),
+				Color(0.15, 0.15, 0.15, 0.8), 1.2)
+	# The half-crumpled sheet, flat on the floor with its corners folded up.
+	var s := [_p(6.0, 3.75, 0), _p(6.32, 3.7, 0.02), _p(6.38, 3.98, 0), _p(6.1, 4.08, 0.03), _p(5.98, 3.95, 0.05)]
+	draw_colored_polygon(PackedVector2Array(s), Color("#9e9a92"))
+	draw_colored_polygon(PackedVector2Array([s[0], s[1], s[1].lerp(s[3], 0.5)]), Color("#c4c0b8"))
+	draw_colored_polygon(PackedVector2Array([s[3], s[4], s[1].lerp(s[3], 0.5)]), Color("#6e6a64"))
+	draw_polyline(PackedVector2Array([s[0].lerp(s[2], 0.2), s[1].lerp(s[3], 0.5), s[4].lerp(s[2], 0.7)]), Color("#2a2a2a"), 1.2)
+	for line in 4:
+		var t := 0.25 + line * 0.15
+		draw_line(s[0].lerp(s[4], t) + Vector2(4, 0), s[1].lerp(s[2], t) - Vector2(4, 0), Color(0.3, 0.3, 0.35, 0.5), 1.0)

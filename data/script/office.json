@@ -3,22 +3,22 @@
 	"lines": {
 		"intro_1": {"speaker": "narrator", "text": "Boston. February. Nineteen thirty-nine."},
 		"intro_2": {"speaker": "narrator", "text": "Rain on the glass. Rent on the desk. A radiator that had stopped pretending."},
-		"intro_3": {"speaker": "narrator", "text": "Four floors up, behind frosted glass that spelled his name backward, [color=#e0b060]Adrian Vale[/color] waited for the day to find him."},
-		"intro_4": {"speaker": "narrator", "text": "He had time for [color=#e0b060]three small things[/color]."},
+		"intro_3": {"speaker": "narrator", "text": "Four floors up, behind frosted glass that spelled his name backward, [color=#d01e2a]Adrian Vale[/color] waited for the day to find him."},
+		"intro_4": {"speaker": "narrator", "text": "He had time for [color=#d01e2a]three small things[/color]."},
 
 		"photo_1": {"speaker": "narrator", "text": "Sylvia. Seventeen. Caught mid-laugh, like the camera had told her a bad joke."},
 		"photo_2": {"speaker": "narrator", "text": "He talked about her to anyone who'd sit still. The frame was the only thing in the office he'd paid full price for."},
 
 		"envelope_1": {"speaker": "narrator", "text": "An envelope for Worcester, in his own careful hand. The month's money for home."},
-		"envelope_2": {"speaker": "narrator", "text": "Always sent. [color=#8d887d]Never quite enough to stop sending.[/color]"},
+		"envelope_2": {"speaker": "narrator", "text": "Always sent. [color=#8a8a8a]Never quite enough to stop sending.[/color]"},
 
 		"pistol_1": {"speaker": "narrator", "text": "Bottom drawer. Under files that paid in promises: a pistol he owned and didn't love."},
-		"pistol_2": {"speaker": "narrator", "text": "Bought because a man in his line was supposed to. Never once carried. [shake rate=14 level=8][color=#e0b060]Dead witnesses can't talk.[/color][/shake]"},
+		"pistol_2": {"speaker": "narrator", "text": "Bought because a man in his line was supposed to. Never once carried. [shake rate=14 level=8][color=#d01e2a]Dead witnesses can't talk.[/color][/shake]"},
 		"pistol_take": {"speaker": "narrator", "text": "He weighed it. Tucked it into his waistband, under the vest. It sat there like a held breath."},
 		"pistol_leave": {"speaker": "narrator", "text": "He closed the drawer. Not for the first time."},
 
 		"gin_1": {"speaker": "narrator", "text": "Third drawer of the cabinet. Good gin, two-thirds full."},
-		"gin_2": {"speaker": "narrator", "text": "For after work. Never during. [color=#8d887d]It wasn't after yet.[/color]"},
+		"gin_2": {"speaker": "narrator", "text": "For after work. Never during. [color=#8a8a8a]It wasn't after yet.[/color]"},
 
 		"knife_1": {"speaker": "narrator", "text": "In the coat on the rack: a folding knife. Long, slim, black-handled. No monogram."},
 		"knife_2": {"speaker": "narrator", "text": "For opening boxes. He pocketed it, same as every morning."},
@@ -41,7 +41,7 @@
 		"narr_drink": {"speaker": "narrator", "text": "Neither was Vale. First thing they agreed on."},
 
 		"tom_2": {"speaker": "tom", "text": "Something walked out of his house in Brookline. A hair ornament. White diamonds, made like a rose with frost on it."},
-		"tom_rose": {"speaker": "tom", "text": "[wave amp=24 freq=2][color=#cfe3ff]The Winter Rose.[/color][/wave]"},
+		"tom_rose": {"speaker": "tom", "text": "[wave amp=24 freq=2][color=#ffffff]The Winter Rose.[/color][/wave]"},
 		"tom_3": {"speaker": "tom", "text": "He wants it back. Quiet. No cops. No papers."},
 
 		"ask_why": {"speaker": "adrian", "text": "Why me?"},
@@ -53,7 +53,7 @@
 		"tom_fee": {"speaker": "tom", "text": "Twenty a day. Expenses."},
 		"say_done": {"speaker": "adrian", "text": "Done."},
 		"tom_done": {"speaker": "tom", "text": "Good."},
-		"say_haggle": {"speaker": "adrian", "text": "For a diamond you can't report stolen? [color=#e0b060]Thirty.[/color]"},
+		"say_haggle": {"speaker": "adrian", "text": "For a diamond you can't report stolen? [color=#d01e2a]Thirty.[/color]"},
 		"bills_fee": {"speaker": "narrator", "text": "He thought of the tailor's letter. Found his voice."},
 		"tom_fee_win": {"speaker": "tom", "text": "Thirty. He said you'd haggle."},
 		"tom_fee_lose": {"speaker": "tom", "text": "Twenty. He said you'd haggle, too."},
@@ -62,6 +62,6 @@
 		"tom_leave": {"speaker": "tom", "text": "I'll be in touch, Vale."},
 		"narr_close": {"speaker": "narrator", "text": "The door shut. The office got smaller."},
 		"end_1": {"speaker": "narrator", "text": "A stolen rose. A dancer. A museum full of other men's treasures."},
-		"end_2": {"speaker": "narrator", "text": "For the first time in a long while: [color=#e0b060]a case.[/color]"}
+		"end_2": {"speaker": "narrator", "text": "For the first time in a long while: [color=#d01e2a]a case.[/color]"}
 	}
 }

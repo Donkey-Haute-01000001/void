@@ -63,4 +63,4 @@ func _draw() -> void:
 		for face in _faces:
 			var outline := face.duplicate()
 			outline.append(face[0])
-			draw_polyline(outline, Color("#e0b060"), 2.5)
+			draw_polyline(outline, Color.WHITE, 2.5)

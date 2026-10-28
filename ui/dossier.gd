@@ -68,9 +68,9 @@ func _build() -> void:
 	shade.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_root.add_child(shade)
 
-	# A slash of amber behind the photo, Katana Zero style.
+	# A slash of red behind the photo: the one colour in a black and white world.
 	var slash := Polygon2D.new()
-	slash.color = Color(Noir.AMBER, 0.85)
+	slash.color = Noir.BLOOD
 	slash.polygon = PackedVector2Array([Vector2(0, 180), Vector2(760, 120), Vector2(700, 900), Vector2(0, 960)])
 	_root.add_child(slash)
 
@@ -94,12 +94,12 @@ func _build() -> void:
 	caption.position = Vector2(20, 522)
 	frame.add_child(caption)
 
-	var title := Noir.label("ADRIAN VALE", Noir.TITLE_FONT, 150, Noir.PAPER)
+	var title := Noir.label("ADRIAN VALE", Noir.TITLE_FONT, 120, Noir.PAPER)
 	title.name = "Title"
 	title.position = Vector2(820, 90)
 	title.pivot_offset = Vector2(300, 80)
 	_root.add_child(title)
-	var sub := Noir.label("PRIVATE INVESTIGATOR   ·   24   ·   WORCESTER, MASS.", Noir.TITLE_FONT, 34, Noir.AMBER)
+	var sub := Noir.label("PRIVATE INVESTIGATOR   ·   24   ·   WORCESTER, MASS.", Noir.TITLE_FONT, 26, Noir.DIM)
 	sub.position = Vector2(826, 250)
 	_root.add_child(sub)
 
@@ -109,7 +109,7 @@ func _build() -> void:
 	names.sort_custom(func(a, b): return SHEET.skills[a] > SHEET.skills[b])
 	for tier in 3:
 		var col := VBoxContainer.new()
-		col.position = Vector2(826 + tier * 340, 330)
+		col.position = Vector2(826 + tier * 360, 330)
 		col.add_theme_constant_override("separation", 6)
 		_root.add_child(col)
 		col.add_child(Noir.label(TIERS[tier][0], Noir.TITLE_FONT, 28, Noir.DIM))
@@ -118,10 +118,10 @@ func _build() -> void:
 			var value: int = SHEET.skills[skill]
 			var row := HBoxContainer.new()
 			row.add_theme_constant_override("separation", 10)
-			var lbl := Noir.label(skill.to_upper(), Noir.TITLE_FONT, 32, Noir.PAPER)
-			lbl.custom_minimum_size.x = 170
+			var lbl := Noir.label(skill.to_upper(), Noir.TITLE_FONT, 24, Noir.PAPER)
+			lbl.custom_minimum_size.x = 230
 			row.add_child(lbl)
-			row.add_child(Noir.label(str(value), Noir.TITLE_FONT, 32, Noir.AMBER))
+			row.add_child(Noir.label(str(value), Noir.TITLE_FONT, 24, Noir.ACCENT))
 			col.add_child(row)
 			col.add_child(_pips(value, TIERS[tier][1]))
 
@@ -130,7 +130,7 @@ func _build() -> void:
 	traits.add_theme_constant_override("separation", 10)
 	_root.add_child(traits)
 	for perk in SHEET.perks:
-		traits.add_child(_trait("PERK", perk, Noir.AMBER))
+		traits.add_child(_trait("PERK", perk, Noir.ACCENT))
 	traits.add_child(_trait("FLAW", SHEET.flaw, Noir.BLOOD))
 
 	var hint := Noir.label("CLICK TO CONTINUE", Noir.TITLE_FONT, 26, Noir.DIM)
@@ -146,7 +146,7 @@ func _pips(value: int, cap: int) -> Control:
 		pip.custom_minimum_size = Vector2(22, 10)
 		var style := StyleBoxFlat.new()
 		if i < value:
-			style.bg_color = Noir.AMBER
+			style.bg_color = Noir.ACCENT
 		elif i < cap:
 			style.bg_color = Color(0, 0, 0, 0)
 			style.border_color = Color(1, 1, 1, 0.3)
@@ -170,6 +170,6 @@ func _trait(kind: String, title: String, color: Color) -> Control:
 	tag_box.add_child(tag)
 	tag_box.custom_minimum_size.x = 70
 	row.add_child(tag_box)
-	row.add_child(Noir.label(title.to_upper(), Noir.TITLE_FONT, 34, Noir.PAPER))
-	row.add_child(Noir.label(NOTES.get(title, ""), Noir.BODY_FONT, 22, Noir.DIM))
+	row.add_child(Noir.label(title.to_upper(), Noir.TITLE_FONT, 24, Noir.PAPER))
+	row.add_child(Noir.label(NOTES.get(title, ""), Noir.BODY_FONT, 18, Noir.DIM))
 	return row

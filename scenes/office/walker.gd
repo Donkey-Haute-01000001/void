@@ -67,17 +67,34 @@ func _draw() -> void:
 	else:
 		_draw_shirtsleeves(h, w)
 	# Head, then fedora or hair.
-	if not hat:
-		draw_circle(Vector2(0, -169 * h), 15.5, hair_color)
-	draw_circle(Vector2(0, -164 * h), 14.0, face_color)
+	var head := Vector2(0, -164 * h)
+	draw_circle(head, 14.0, face_color)
+	draw_circle(head + Vector2(2, -1), 1.6, face_color.darkened(0.75))
+	draw_circle(head + Vector2(9, -1), 1.6, face_color.darkened(0.75))
+	draw_line(head + Vector2(10, 6), head + Vector2(4, 7), face_color.darkened(0.45), 1.5)
 	if hat:
 		draw_rect(Rect2(-25, -178 * h, 50, 6), body_color.darkened(0.5))
 		draw_rect(Rect2(-14, -190 * h, 28, 13), body_color.darkened(0.5))
 		draw_rect(Rect2(-14, -180 * h, 28, 3), Color("#5a2a26"))
 	else:
-		# A loose curl falling over the forehead.
-		draw_colored_polygon(PackedVector2Array([
-			Vector2(-13, -172 * h), Vector2(13, -172 * h), Vector2(4, -169 * h), Vector2(-6, -167.5 * h)]), hair_color)
+		_draw_hair(head)
+
+
+## Short hair combed back with a side parting: a cap over the top of the head
+## that stops at the hairline, plus sideburns.
+func _draw_hair(head: Vector2) -> void:
+	var cap := PackedVector2Array()
+	for i in 13:
+		var a := PI + PI * i / 12.0
+		cap.append(head + Vector2(cos(a), sin(a)) * 15.5)
+	cap.append(head + Vector2(14, -3))
+	cap.append(head + Vector2(6, -7))
+	cap.append(head + Vector2(-4, -6))
+	cap.append(head + Vector2(-14, -3))
+	draw_colored_polygon(cap, hair_color)
+	draw_line(head + Vector2(-5, -15), head + Vector2(-3, -7), hair_color.lightened(0.25), 1.5)
+	draw_rect(Rect2(head + Vector2(-14.5, -4), Vector2(3, 7)), hair_color)
+	draw_rect(Rect2(head + Vector2(11.5, -4), Vector2(3, 7)), hair_color)
 
 
 func _draw_coated(h: float, w: float) -> void:
@@ -97,18 +114,23 @@ func _draw_shirtsleeves(h: float, w: float) -> void:
 	var shirt := Color("#cfc8b8")
 	var vest := Color("#2e2a30")
 	var trousers := Color("#26262c")
-	draw_rect(Rect2(-12 * w, -72 * h, 10 * w, 72 * h), trousers)
-	draw_rect(Rect2(2 * w, -72 * h, 10 * w, 72 * h), trousers)
+	draw_rect(Rect2(-12 * w, -80 * h, 10 * w, 80 * h), trousers)
+	draw_rect(Rect2(2 * w, -80 * h, 10 * w, 80 * h), trousers)
 	draw_rect(Rect2(-13 * w, -4, 12 * w, 4), Color("#120f0c"))
 	draw_rect(Rect2(1 * w, -4, 12 * w, 4), Color("#120f0c"))
 	draw_colored_polygon(PackedVector2Array([
-		Vector2(-19 * w, -150 * h), Vector2(19 * w, -150 * h), Vector2(16 * w, -72 * h), Vector2(-16 * w, -72 * h)]), shirt)
-	draw_line(Vector2(0, -150 * h), Vector2(0, -116 * h), Color("#7a2a26"), 4.0)
+		Vector2(-19 * w, -150 * h), Vector2(19 * w, -150 * h), Vector2(16 * w, -82 * h), Vector2(-16 * w, -82 * h)]), shirt)
+	draw_rect(Rect2(-16 * w, -84 * h, 32 * w, 6 * h), trousers)
+	draw_line(Vector2(0, -150 * h), Vector2(0, -116 * h), Color("#c8141e"), 4.0)
+	# Waistcoat: inside the shirt's outline, open at the shoulders, a V at the
+	# neck and the two points at the waist that sit over the belt.
 	draw_colored_polygon(PackedVector2Array([
-		Vector2(-18 * w, -138 * h), Vector2(-6 * w, -138 * h), Vector2(0, -116 * h), Vector2(6 * w, -138 * h),
-		Vector2(18 * w, -138 * h), Vector2(16 * w, -70 * h), Vector2(-16 * w, -70 * h)]), vest)
-	for i in 3:
-		draw_circle(Vector2(1, (-108 + i * 12) * h), 1.5, Color("#8a7a5a"))
+		Vector2(-13 * w, -146 * h), Vector2(-5 * w, -146 * h), Vector2(0, -122 * h), Vector2(5 * w, -146 * h),
+		Vector2(13 * w, -146 * h), Vector2(16 * w, -132 * h), Vector2(15 * w, -80 * h), Vector2(8 * w, -74 * h),
+		Vector2(0, -79 * h), Vector2(-8 * w, -74 * h), Vector2(-15 * w, -80 * h), Vector2(-16 * w, -132 * h)]), vest)
+	draw_line(Vector2(0, -122 * h), Vector2(0, -79 * h), vest.darkened(0.5), 1.0)
+	for i in 4:
+		draw_circle(Vector2(2, (-114 + i * 10) * h), 1.5, Color("#9a9a9a"))
 	# Sleeves rolled to the elbow.
 	for side in [-1, 1]:
 		var shoulder := Vector2(side * 19 * w, -146 * h)

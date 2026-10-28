@@ -2,13 +2,13 @@
 
 importer="font_data_dynamic"
 type="FontFile"
-uid="uid://dtr2ja2tf06s0"
-path="res://.godot/imported/BebasNeue-Regular.ttf-25291a3f1d8e02b4ad0dea769f9b4fbc.fontdata"
+uid="uid://dvbybqlhwdfoh"
+path="res://.godot/imported/Limelight-Regular.ttf-a43c8f8d68815e01a4123ce81f80311c.fontdata"
 
 [deps]
 
-source_file="res://art/fonts/BebasNeue-Regular.ttf"
-dest_files=["res://.godot/imported/BebasNeue-Regular.ttf-25291a3f1d8e02b4ad0dea769f9b4fbc.fontdata"]
+source_file="res://art/fonts/Limelight-Regular.ttf"
+dest_files=["res://.godot/imported/Limelight-Regular.ttf-a43c8f8d68815e01a4123ce81f80311c.fontdata"]
 
 [params]
 

@@ -48,7 +48,7 @@ func set_objective(text: String, left: int, total: int) -> void:
 	for i in total:
 		var pip := ColorRect.new()
 		pip.custom_minimum_size = Vector2(18, 18)
-		pip.color = Noir.AMBER if i < left else Color(1, 1, 1, 0.15)
+		pip.color = Noir.ACCENT if i < left else Color(1, 1, 1, 0.15)
 		_pips.add_child(pip)
 
 
@@ -90,7 +90,7 @@ func _build_card() -> void:
 	frame.rotation = deg_to_rad(-2)
 	photo.rotation = deg_to_rad(-2)
 
-	var title := Noir.label("ADRIAN VALE", Noir.TITLE_FONT, 54, Noir.PAPER)
+	var title := Noir.label("ADRIAN VALE", Noir.TITLE_FONT, 44, Noir.PAPER)
 	title.position = Vector2(190, 0)
 	card.add_child(title)
 	var role := Noir.label("PRIVATE INVESTIGATOR", Noir.BODY_FONT, 18, Noir.DIM)
@@ -133,7 +133,7 @@ func _build_objective() -> void:
 	box.position = Vector2(40, 30)
 	box.add_theme_constant_override("separation", 8)
 	_root.add_child(box)
-	_objective = Noir.label("", Noir.TITLE_FONT, 34, Noir.AMBER)
+	_objective = Noir.label("", Noir.TITLE_FONT, 34, Noir.ACCENT)
 	box.add_child(_objective)
 	_pips = HBoxContainer.new()
 	_pips.add_theme_constant_override("separation", 8)

@@ -40,9 +40,9 @@ func _draw() -> void:
 	for i in range(1, 20):
 		var y := i * D / 20.0
 		draw_line(_p(0, y, 0), _p(W, y, 0), Color("#46311f"), 2.0)
-	_quad(_p(2.6, 1.6, 0), _p(7.4, 1.6, 0), _p(7.4, 5.8, 0), _p(2.6, 5.8, 0), Color("#5e2a2c"))
+	_quad(_p(2.6, 1.6, 0), _p(7.4, 1.6, 0), _p(7.4, 5.8, 0), _p(2.6, 5.8, 0), Color("#3a3634"))
 	var rug := PackedVector2Array([_p(2.8, 1.8, 0), _p(7.2, 1.8, 0), _p(7.2, 5.6, 0), _p(2.8, 5.6, 0), _p(2.8, 1.8, 0)])
-	draw_polyline(rug, Color("#8a5a3a"), 2.0)
+	draw_polyline(rug, Color("#6a6460"), 2.0)
 
 	# Back walls: wallpaper over dark wood wainscot.
 	_quad(_p(0, 0, 0), _p(W, 0, 0), _p(W, 0, H), _p(0, 0, H), Color("#4a5244"))
@@ -63,6 +63,7 @@ func _draw() -> void:
 	draw_line(_p(0, 0, H), _p(0, D, H), Color("#15130f"), 10.0)
 
 	_draw_window()
+	_draw_radiator()
 	_draw_door()
 	_draw_wall_things()
 
@@ -95,6 +96,25 @@ func _draw_window() -> void:
 	draw_polyline(frame, Color("#2b2119"), 10.0)
 	draw_line(_p((x0 + x1) * 0.5, 0, z0), _p((x0 + x1) * 0.5, 0, z1), Color("#2b2119"), 6.0)
 	_quad(_p(x0 - 0.1, 0, z0 - 0.05), _p(x1 + 0.1, 0, z0 - 0.05), _p(x1 + 0.1, 0.12, z0 - 0.05), _p(x0 - 0.1, 0.12, z0 - 0.05), Color("#6b5038"))
+
+
+## Cast-iron radiator under the window, flat against the wall, so nothing
+## in the room can sort in front of or behind it wrongly.
+func _draw_radiator() -> void:
+	var x0 := 4.4
+	var x1 := 6.2
+	var y := 0.28
+	var top := 0.55
+	_quad(_p(x0, 0.02, top), _p(x1, 0.02, top), _p(x1, y, top), _p(x0, y, top), Color("#6a6a68"))
+	_quad(_p(x0, y, 0.06), _p(x1, y, 0.06), _p(x1, y, top), _p(x0, y, top), Color("#4a4a48"))
+	_quad(_p(x1, 0.02, 0.06), _p(x1, y, 0.06), _p(x1, y, top), _p(x1, 0.02, top), Color("#5a5a58"))
+	var fins := 14
+	for i in range(1, fins):
+		var x := lerpf(x0, x1, float(i) / fins)
+		draw_line(_p(x, y, 0.1), _p(x, y, top - 0.04), Color("#2e2e2c"), 3.0)
+	# Feet.
+	for x in [x0 + 0.08, x1 - 0.12]:
+		_quad(_p(x, y - 0.05, 0), _p(x + 0.05, y - 0.05, 0), _p(x + 0.05, y - 0.05, 0.06), _p(x, y - 0.05, 0.06), Color("#2e2e2c"))
 
 
 func _draw_door() -> void:

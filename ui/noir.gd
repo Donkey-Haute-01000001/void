@@ -1,21 +1,24 @@
 class_name Noir
-## Shared look for the noir UI: palette, fonts and box styles.
+## Shared look for the UI: Sin City palette (black, white, greys and one red)
+## and art deco type.
 
-const INK := Color("#08080a")
-const PAPER := Color("#e8e2d4")
-const DIM := Color("#8d887d")
-const AMBER := Color("#e0b060")
-const BLOOD := Color("#b8323a")
-const STEEL := Color("#9fb8d0")
-const SANITY := Color("#6fa8a0")
+const INK := Color("#060606")
+const PAPER := Color("#ededed")
+const DIM := Color("#8a8a8a")
+## Highlights and emphasis: plain white, so the red stays rare.
+const ACCENT := Color("#ffffff")
+## The one colour: blood, danger, and words that matter.
+const BLOOD := Color("#d01e2a")
+const STEEL := Color("#a8a8a8")
+const SANITY := Color("#c8c8c8")
 
-const TITLE_FONT := preload("res://art/fonts/BebasNeue-Regular.ttf")
-const NARRATOR_FONT := preload("res://art/fonts/SpecialElite-Regular.ttf")
+const TITLE_FONT := preload("res://art/fonts/Limelight-Regular.ttf")
+const NARRATOR_FONT := preload("res://art/fonts/PlayfairDisplay.ttf")
 const SPEECH_FONT := preload("res://art/fonts/CourierPrime-Bold.ttf")
 const BODY_FONT := preload("res://art/fonts/CourierPrime-Regular.ttf")
 
 ## Name-tag colour for each speaker.
-const SPEAKER_COLORS := {"adrian": AMBER, "tom": STEEL}
+const SPEAKER_COLORS := {"adrian": ACCENT, "tom": STEEL}
 const SPEAKER_NAMES := {"adrian": "VALE", "tom": "GARRITY"}
 
 

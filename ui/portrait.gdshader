@@ -1,7 +1,7 @@
 shader_type canvas_item;
-// Placeholder portraits as noir photographs: greyscale, crushed blacks, warm tint.
-uniform vec3 tint : source_color = vec3(1.0, 0.93, 0.82);
-uniform float contrast = 1.35;
+// Placeholder portraits as noir photographs: hard black and white.
+uniform vec3 tint : source_color = vec3(1.0, 1.0, 1.0);
+uniform float contrast = 1.6;
 
 void fragment() {
 	vec4 c = texture(TEXTURE, UV);
