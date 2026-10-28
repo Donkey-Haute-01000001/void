@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="CharacterSheet" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://core/character_sheet.gd" id="1_sheet"]
+
+[resource]
+script = ExtResource("1_sheet")
+display_name = "Tom Garrity"
+skills = {
+"eloquence": 2,
+"firearms": 9,
+"investigation": 7,
+"medicine": 4,
+"occultism": 1,
+"psychology": 5,
+"speed": 3,
+"strength": 8,
+"willpower": 5
+}
+perks = Array[String]([])
+flaw = "Shell Shock"
